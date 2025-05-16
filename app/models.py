@@ -73,7 +73,7 @@ class UserDrop(db.Model):
     lootbox_type_id = db.Column(db.Integer, db.ForeignKey('lootbox_types.id'), nullable=False)
 
     external_drop_id = db.Column(db.String(255), nullable=False)
-    timestamp = db.Column(db.DateTime, nullable=False)  # Время получения дропа
+    timestamp = db.Column(db.DateTime, nullable=False)
 
     item_name = db.Column(db.String(255), nullable=False)
     # Текстовое представление типа предмета (Персонаж, Оружие, Скин, Карта и т.д.)
@@ -82,7 +82,7 @@ class UserDrop(db.Model):
     item_rarity_text = db.Column(db.String(50), nullable=True)
     quantity = db.Column(db.Integer, nullable=False, default=1)
 
-    # Для хранения оригинального JSON-объекта этого дропа, если потребуется для отладки или будущей обработки
+    # Для хранения оригинального JSON-объекта дропа, если потребуется для отладки или будущей обработки
     raw_data = db.Column(db.JSON, nullable=True)
 
     __table_args__ = (db.UniqueConstraint('user_id', 'game_id', 'external_drop_id', name='uq_user_game_external_drop'),)

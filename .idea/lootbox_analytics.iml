@@ -12,5 +12,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Python 3.13 (lootbox_analytics) interpreter library" level="application" />
+    <orderEntry type="library" name="bootstrap" level="application" />
   </component>
 </module>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    {% if title %}
+    <title>{{ title }} - Lootbox Analytics</title>
+    {% else %}
+    <title>Lootbox Analytics</title>
+    {% endif %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<nav>
+    <a href="{{ url_for('main.index') }}">Главная</a>
+    {% if current_user.is_anonymous %}
+    <a href="{{ url_for('auth.login') }}">Войти</a>
+    <a href="{{ url_for('auth.register') }}">Регистрация</a>
+    {% else %}
+    <a href="{{ url_for('main.dashboard') }}">Дашборд</a>
+    <a href="{{ url_for('auth.logout') }}">Выйти ({{ current_user.username }})</a>
+    {% endif %}
+</nav>
+<hr>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="alert alert-{{ category }}">{{ message }}</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+{% block content %}{% endblock %}
+</body>
+</html>
