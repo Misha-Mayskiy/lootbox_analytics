@@ -55,14 +55,28 @@
             {% else %}
             <p>Следующий 5★ персонаж: 50% шанс на ивентового.</p>
             {% endif %}
-            <p><small>(Выиграно 50/50: {{ state.wins_50_50 }} раз, Проиграно 50/50: {{ state.losses_50_50 }} раз, если
-                были 5★)</small></p>
+            {% if state.wins_50_50 + state.losses_50_50 > 0 %}
+            <p>
+                Процент выигрышей 50/50: <strong>{{ state.win_rate_50_50 }}%</strong>
+                <small> (Выиграно: {{ state.wins_50_50 }}, Проиграно: {{ state.losses_50_50 }})</small>
+            </p>
+            {% endif %}
             {% endif %}
 
-            {% if banner_group_name == 'weapon_event' %}
-            <h5>Epitomized Path (Путь Воплощения):</h5>
-            <p class="text-muted"><small>Отслеживание очков судьбы и выбранного оружия будет добавлено позже.</small>
-            </p>
+            {% if state.avg_pity_5_star > 0 %}
+            <p>Средний Pity для 5★ в этой группе: <strong>{{ state.avg_pity_5_star }}</strong></p>
+            {% endif %}
+
+            {% if state.pity_luck_5_star and state.pity_luck_5_star.total > 0 %}
+            <h6>Удачливость по Pity для 5★ (всего {{ state.pity_luck_5_star.total }} шт.):</h6>
+            <ul class="list-inline">
+                <li class="list-inline-item">Рано (до soft-pity): <span class="badge badge-success">{{ state.pity_luck_5_star.early }}</span>
+                </li>
+                <li class="list-inline-item">В зоне soft-pity: <span class="badge badge-info">{{ state.pity_luck_5_star.soft_pity_zone }}</span>
+                </li>
+                <li class="list-inline-item">На hard-pity/позже: <span class="badge badge-warning">{{ state.pity_luck_5_star.hard_pity }}</span>
+                </li>
+            </ul>
             {% endif %}
         </div>
 
@@ -87,8 +101,7 @@
                 </li>
                 {% endfor %}
             </ul>
-            <!-- Сюда позже график истории pity для этой группы -->
-            <canvas id="pityHistoryLineChart_{{ banner_group_name }}" style="display:none;"></canvas>
+            <canvas id="pityHistoryLineChart_{{ banner_group_name }}" class="mt-3" style="max-height: 250px;"></canvas>
             {% else %}
             <p>Пока нет 5★ дропов в этой группе.</p>
             {% endif %}

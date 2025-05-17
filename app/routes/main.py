@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, url_for, redirect, flash
 from flask_login import login_required, current_user
 
-from app.models import Game, UserDrop
+from app.models import Game
 from app.services.genshin_stats_service import GenshinPityTracker, PITY_LIMITS
 
 bp = Blueprint('main', __name__, template_folder='../../templates/main')

@@ -53,34 +53,35 @@ class GenshinPityTracker:
             group = self._get_banner_group_for_drop(drop)
             if group == banner_group_name:
                 filtered_drops.append(drop)
-        return filtered_drops  # Уже отсортированы по timestamp.asc()
+        return filtered_drops
 
     def calculate_all_banner_states(self):
         """Рассчитывает состояние для всех основных групп баннеров."""
         self.banner_states['character_event'] = self._calculate_character_event_state()
         self.banner_states['weapon_event'] = self._calculate_weapon_event_state()
         self.banner_states['standard'] = self._calculate_standard_state()
-        # self.banner_states['beginner'] = self._calculate_beginner_state() # Можно добавить
         return self.banner_states
 
     def _calculate_character_event_state(self):
         state = {
             'pity5_count': 0,
             'pity4_count': 0,
-            'lose50_active': False,  # True если следующий 5* гарантированно ивентовый
+            'lose50_active': False,
             'history_5_star': [],
             'total_pulls': 0,
             'wins_50_50': 0,
             'losses_50_50': 0,
-            'avg_pity_5_star': 0
+            'win_rate_50_50': 0,
+            'avg_pity_5_star': 0,
+            'pity_luck_5_star': {}
         }
+
         drops = self._filter_drops_for_banner_group('character_event')
         state['total_pulls'] = len(drops)
         if not drops: return state
 
         _internal_lose50_flag_for_next_guarantee = False
         pity_sum_5_star = 0
-        count_5_star_for_avg = 0
 
         for drop in drops:
             state['pity4_count'] += 1
@@ -89,7 +90,6 @@ class GenshinPityTracker:
             if drop.item_rarity_text == '5':
                 pity_at_hit = state['pity5_count']
                 pity_sum_5_star += pity_at_hit
-                count_5_star_for_avg += 1
 
                 is_standard_char = drop.item_name in STANDARD_5_STAR_CHARACTERS_EVENT_BANNER
                 won_50_50_this_drop = None
@@ -123,30 +123,38 @@ class GenshinPityTracker:
                 state['pity4_count'] = 0
 
         state['lose50_active'] = _internal_lose50_flag_for_next_guarantee
-        if count_5_star_for_avg > 0:
-            state['avg_pity_5_star'] = round(pity_sum_5_star / count_5_star_for_avg, 1)
+
+        # Расчет среднего pity и процента выигрыша 50/50
+        total_50_50_outcomes = state['wins_50_50'] + state['losses_50_50']
+        if total_50_50_outcomes > 0:
+            state['win_rate_50_50'] = round((state['wins_50_50'] / total_50_50_outcomes) * 100, 1)
+
+        if state['history_5_star']:
+            state['avg_pity_5_star'] = round(pity_sum_5_star / len(state['history_5_star']), 1)
+            state['pity_luck_5_star'] = self._analyze_pity_luck(state['history_5_star'],
+                                                                soft_pity_start=74,
+                                                                hard_pity_limit=PITY_LIMITS['character_event'][
+                                                                    '5_star'])
         return state
 
     def _calculate_generic_banner_state(self, banner_group_name):
-        """Общая функция для Standard и Weapon (пока без Epitomized Path)"""
         state = {
             'pity5_count': 0,
             'pity4_count': 0,
             'history_5_star': [],
             'total_pulls': 0,
-            'avg_pity_5_star': 0
-            # Для weapon_event можно будет добавить fate_points и т.д.
+            'avg_pity_5_star': 0,
+            'pity_luck_5_star': {}
         }
         if banner_group_name == 'weapon_event':
-            state['fate_points'] = 0  # Заглушка
-            state['selected_epitome_item_name'] = None  # Заглушка
+            state['fate_points'] = 0
+            state['selected_epitome_item_name'] = None
 
         drops = self._filter_drops_for_banner_group(banner_group_name)
         state['total_pulls'] = len(drops)
         if not drops: return state
 
         pity_sum_5_star = 0
-        count_5_star_for_avg = 0
 
         for drop in drops:
             state['pity4_count'] += 1
@@ -155,39 +163,37 @@ class GenshinPityTracker:
             if drop.item_rarity_text == '5':
                 pity_at_hit = state['pity5_count']
                 pity_sum_5_star += pity_at_hit
-                count_5_star_for_avg += 1
                 state['history_5_star'].append({
                     'pity_at': pity_at_hit,
                     'item_name': drop.item_name,
                     'timestamp': drop.timestamp
-                    # Для weapon_event здесь будет логика Epitomized Path
                 })
                 state['pity5_count'] = 0
                 state['pity4_count'] = 0
             elif drop.item_rarity_text == '4':
                 state['pity4_count'] = 0
 
-        if count_5_star_for_avg > 0:
-            state['avg_pity_5_star'] = round(pity_sum_5_star / count_5_star_for_avg, 1)
+        if state['history_5_star']:
+            state['avg_pity_5_star'] = round(pity_sum_5_star / len(state['history_5_star']), 1)
+            soft_pity_start = 0
+            if banner_group_name == 'weapon_event':
+                soft_pity_start = 62
+            elif banner_group_name == 'standard':
+                soft_pity_start = 74
+
+            if soft_pity_start > 0:
+                state['pity_luck_5_star'] = self._analyze_pity_luck(state['history_5_star'],
+                                                                    soft_pity_start=soft_pity_start,
+                                                                    hard_pity_limit=PITY_LIMITS[banner_group_name][
+                                                                        '5_star'])
         return state
 
     def _calculate_weapon_event_state(self):
-        # Пока что используем общую логику, потом доработаем Epitomized Path
-        # Эта функция будет сложнее, когда добавим отслеживание fate_points
-        # и featured оружия с помощью таблиц Banner/BannerItem
         state = self._calculate_generic_banner_state('weapon_event')
-        # Здесь в будущем будет логика для fate_points, если мы сможем определить featured
-        # и пользователь будет выбирать цель.
-        # Пока оставляем fate_points = 0 как заглушку.
         return state
 
     def _calculate_standard_state(self):
         return self._calculate_generic_banner_state('standard')
-
-    # def _calculate_beginner_state(self):
-    #     # Упрощенный, т.к. всего 20 круток и свои гаранты
-    #     # ...
-    #     pass
 
     def get_overall_stats(self):
         """Собирает общую статистику по всем дропам игры."""
@@ -198,7 +204,7 @@ class GenshinPityTracker:
         for drop in self.all_user_drops_for_game:
             if drop.item_rarity_text in rarity_counts:
                 rarity_counts[drop.item_rarity_text] += 1
-            else:  # На случай если в данных будет другая редкость
+            else:
                 rarity_counts[drop.item_rarity_text] = 1
 
         total_pulls = len(self.all_user_drops_for_game)
@@ -206,6 +212,20 @@ class GenshinPityTracker:
 
     def get_latest_drops(self, limit=10):
         """Возвращает последние N дропов."""
-        # all_user_drops_for_game уже отсортированы по timestamp.asc()
-        # поэтому берем срез с конца
-        return self.all_user_drops_for_game[-limit:][::-1]  # Срез и реверс для desc() порядка
+        return self.all_user_drops_for_game[-limit:][::-1]
+
+    def _analyze_pity_luck(self, history_5_star, soft_pity_start, hard_pity_limit):
+        """Анализирует историю 5* дропов на предмет ранних/поздних выпадений."""
+        if not history_5_star:
+            return {'early': 0, 'soft_pity_zone': 0, 'hard_pity': 0, 'total': 0}
+
+        luck_stats = {'early': 0, 'soft_pity_zone': 0, 'hard_pity': 0, 'total': len(history_5_star)}
+        for drop_info in history_5_star:
+            pity = drop_info['pity_at']
+            if pity < soft_pity_start:
+                luck_stats['early'] += 1
+            elif pity < hard_pity_limit:
+                luck_stats['soft_pity_zone'] += 1
+            else:
+                luck_stats['hard_pity'] += 1
+        return luck_stats
