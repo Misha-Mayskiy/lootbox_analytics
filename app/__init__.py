@@ -3,14 +3,14 @@ from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
-from flask_openid import OpenID
+from authlib.integrations.flask_client import OAuth
 import os
 
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
-oid = OpenID()
+oauth = OAuth()
 
 
 def create_app(config_class=Config):
@@ -29,10 +29,23 @@ def create_app(config_class=Config):
 
     app.config.from_object(config_class)
 
+    if not app.secret_key and 'SECRET_KEY' in app.config:
+        app.secret_key = app.config['SECRET_KEY']
+    elif not app.secret_key:
+        raise ValueError("No SECRET_KEY set for Flask application")
+
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
-    oid.init_app(app)
+    oauth.init_app(app)
+
+    oauth.register(
+        name='steam',
+        server_metadata_url='https://steamcommunity.com/openid/.well-known/openid-configuration',
+        client_kwargs={
+            'scope': 'openid profile email',
+        }
+    )
 
     from app.routes.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')

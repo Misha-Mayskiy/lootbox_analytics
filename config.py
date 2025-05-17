@@ -12,3 +12,5 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     OPENID_FS_STORE_PATH = os.path.join(basedir, 'openid_store')
     STEAM_API_KEY = os.environ.get('STEAM_API_KEY')
+    PREFERRED_URL_SCHEME = 'https'
+    SESSION_COOKIE_SECURE = True
