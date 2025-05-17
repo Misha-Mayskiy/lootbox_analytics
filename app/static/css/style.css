@@ -1,0 +1,14 @@
+.rarity-5 {
+    border-left: 5px solid gold !important;
+    background-color: rgba(255, 215, 0, 0.1); /* легкий золотой фон */
+}
+
+.rarity-4 {
+    border-left: 5px solid purple !important;
+    background-color: rgba(128, 0, 128, 0.1); /* легкий фиолетовый фон */
+}
+
+.rarity-3 {
+    border-left: 5px solid dodgerblue !important;
+    background-color: rgba(30, 144, 255, 0.05); /* легкий голубой фон */
+}

@@ -4,83 +4,208 @@
 <div class="container mt-4">
     <h2>Статистика Genshin Impact для {{ current_user.username }}</h2>
 
-    <div class="row mt-4">
-        <div class="col-md-4">
-            <h4>Общая статистика:</h4>
-            <p>Всего сделано молитв: <strong>{{ total_pulls }}</strong></p>
-            <ul>
-                <li>5★ предметы: {{ rarity_counts['5'] }}</li>
-                <li>4★ предметы: {{ rarity_counts['4'] }}</li>
-                <li>3★ предметы: {{ rarity_counts['3'] }}</li>
-            </ul>
-        </div>
-        <div class="col-md-8">
-            <h4>Pity трекеры (упрощенно):</h4>
-            {% if pity_data.character_event_5_star %}
-            <p><strong>Ивентовый баннер персонажа (5★):</strong>
-                Сделано после последней 5★: {{ pity_data.character_event_5_star.current_pity }} / {{
-                pity_data.character_event_5_star.guarantee_at }}
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <h4>Общая статистика (всего молитв: {{ total_pulls_overall }})</h4>
+            <p>
+                5★: {{ rarity_counts_overall['5'] }} |
+                4★: {{ rarity_counts_overall['4'] }} |
+                3★: {{ rarity_counts_overall['3'] }}
             </p>
-            <p><strong>Ивентовый баннер персонажа (4★):</strong>
-                Сделано после последней 4★: {{ pity_data.character_event_4_star.current_pity }} / {{
-                pity_data.character_event_4_star.guarantee_at }}
-            </p>
-            {% endif %}
-            {% if pity_data.standard_banner_5_star %}
-            <p><strong>Стандартный баннер (5★):</strong>
-                Сделано после последней 5★: {{ pity_data.standard_banner_5_star.current_pity }} / {{
-                pity_data.standard_banner_5_star.guarantee_at }}
-            </p>
-            {% endif %}
-            <p><small>Примечание: Pity для оружейного баннера и полный учет 50/50 не реализованы в этой базовой
-                версии.</small></p>
+            <!-- Сюда позже добавим график Pie Chart для rarity_counts_overall -->
+            <div style="width: 300px; margin: auto;">
+                <canvas id="overallRarityPieChart"></canvas>
+            </div>
         </div>
     </div>
 
-    <h4 class="mt-4">Последние 10 молитв:</h4>
+    {% for banner_group_name, state in banner_states.items() %}
+    {% if state and state.total_pulls > 0 %} {# Показываем блок, только если есть крутки в этой группе #}
+    <div class="row mt-4 p-3 border rounded">
+        <div class="col-md-12">
+            {% if banner_group_name == 'character_event' %}
+            <h4>Ивентовые баннеры персонажей (Общий Pity для 301/400)</h4>
+            {% elif banner_group_name == 'weapon_event' %}
+            <h4>Оружейный баннер (302)</h4>
+            {% elif banner_group_name == 'standard' %}
+            <h4>Стандартный баннер (200)</h4>
+            {% else %}
+            <h4>{{ banner_group_name | capitalize }}</h4>
+            {% endif %}
+            <p>Всего молитв в этой группе: {{ state.total_pulls }}</p>
+        </div>
+
+        <div class="col-md-6">
+            <h5>Pity счетчики:</h5>
+            <p>
+                До следующего 5★:
+                <strong>{{ state.pity5_count }} / {{ pity_limits[banner_group_name]['5_star'] }}</strong>
+                (Осталось: {{ pity_limits[banner_group_name]['5_star'] - state.pity5_count }})
+            </p>
+            <p>
+                До следующего 4★:
+                <strong>{{ state.pity4_count }} / {{ pity_limits[banner_group_name]['4_star'] }}</strong>
+                (Осталось: {{ pity_limits[banner_group_name]['4_star'] - state.pity4_count }})
+            </p>
+
+            {% if banner_group_name == 'character_event' %}
+            <h5>Статус 50/50:</h5>
+            {% if state.lose50_active %}
+            <p class="text-success"><strong>Следующий 5★ персонаж гарантированно будет ивентовым!</strong></p>
+            {% else %}
+            <p>Следующий 5★ персонаж: 50% шанс на ивентового.</p>
+            {% endif %}
+            <p><small>(Выиграно 50/50: {{ state.wins_50_50 }} раз, Проиграно 50/50: {{ state.losses_50_50 }} раз, если
+                были 5★)</small></p>
+            {% endif %}
+
+            {% if banner_group_name == 'weapon_event' %}
+            <h5>Epitomized Path (Путь Воплощения):</h5>
+            <p class="text-muted"><small>Отслеживание очков судьбы и выбранного оружия будет добавлено позже.</small>
+            </p>
+            {% endif %}
+        </div>
+
+        <div class="col-md-6">
+            <h5>История 5★ дропов в этой группе:</h5>
+            {% if state.history_5_star %}
+            <ul class="list-unstyled">
+                {% for s_drop in state.history_5_star | reverse %} {# Показываем последние сначала #}
+                <li>
+                    <strong>{{ s_drop.item_name }}</strong> (выпал на {{ s_drop.pity_at }}-й молитве pity)
+                    <small class="text-muted">{{ s_drop.timestamp.strftime('%d.%m.%y %H:%M') }}</small>
+                    {% if banner_group_name == 'character_event' %}
+                    {% if s_drop.was_guarantee %}
+                    <span class="badge badge-success">Гарант</span>
+                    {% elif s_drop.won_50_50 is true %}
+                    <span class="badge badge-info">50/50 Выигран</span>
+                    {% elif s_drop.won_50_50 is false %}
+                    <span class="badge badge-warning">50/50 Проигран</span>
+                    {% if s_drop.is_standard_char_on_event_banner %} (стандартный) {% endif %}
+                    {% endif %}
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            <!-- Сюда позже график истории pity для этой группы -->
+            <canvas id="pityHistoryLineChart_{{ banner_group_name }}" style="display:none;"></canvas>
+            {% else %}
+            <p>Пока нет 5★ дропов в этой группе.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <h4 class="mt-4">Последние 10 молитв (все баннеры):</h4>
     {% if latest_drops %}
     <ul class="list-group">
         {% for drop in latest_drops %}
-        <li class="list-group-item">
-            <strong>{{ drop.item_name }}</strong> ({{ drop.item_rarity_text }}★) -
-            Тип: {{ drop.item_type_text }} -
-            Баннер: {{ drop.lootbox_type.name }} -
-            Время: {{ drop.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+        <li class="list-group-item d-flex justify-content-between align-items-center
+            {% if drop.item_rarity_text == '5' %} rarity-5
+            {% elif drop.item_rarity_text == '4' %} rarity-4
+            {% else %} rarity-3 {% endif %}">
+            <div>
+                <strong>{{ drop.item_name }}</strong> ({{ drop.item_rarity_text }}★)
+                <small class="text-muted"> - Тип: {{ drop.item_type_text }} - Баннер: {{ drop.lootbox_type.name
+                    }}</small>
+            </div>
+            <span class="badge badge-secondary">{{ drop.timestamp.strftime('%d.%m.%Y %H:%M') }}</span>
         </li>
         {% endfor %}
     </ul>
     {% else %}
     <p>Нет данных о молитвах.</p>
     {% endif %}
-
-    <h4 class="mt-4">Пример списка всех молитв (первые 20):</h4>
-    {% if drops_list %}
-    <table class="table table-striped table-sm mt-3">
-        <thead>
-        <tr>
-            <th>Время</th>
-            <th>Предмет</th>
-            <th>Редкость</th>
-            <th>Тип</th>
-            <th>Баннер</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for drop in drops_list %}
-        <tr>
-            <td>{{ drop.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
-            <td>{{ drop.item_name }}</td>
-            <td>{{ drop.item_rarity_text }}★</td>
-            <td>{{ drop.item_type_text }}</td>
-            <td>{{ drop.lootbox_type.name }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>Нет данных для отображения.</p>
-    {% endif %}
     <p><a href="{{ url_for('main.genshin_import_url_page') }}" class="btn btn-info mt-3">Импортировать еще данные</a>
     </p>
 </div>
+
+<!-- Скрипты для графиков Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Общий график редкости
+        const overallRarityCtx = document.getElementById('overallRarityPieChart');
+        const overallRarityData = JSON.parse('{{ rarity_counts_overall | default({}, true) | tojson | safe }}');
+        // Проверка, что данные не пустые
+        if (overallRarityCtx && Object.keys(overallRarityData).length > 0 && (overallRarityData['3'] || overallRarityData['4'] || overallRarityData['5'])) {
+            new Chart(overallRarityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['5★ (' + (overallRarityData['5'] || 0) + ')', '4★ (' + (overallRarityData['4'] || 0) + ')', '3★ (' + (overallRarityData['3'] || 0) + ')'],
+                    datasets: [{
+                        label: 'Распределение по редкости',
+                        data: [overallRarityData['5'] || 0, overallRarityData['4'] || 0, overallRarityData['3'] || 0],
+                        backgroundColor: ['gold', 'purple', 'dodgerblue'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {legend: {position: 'bottom'}}
+                }
+            });
+        } else if (overallRarityCtx) {
+            overallRarityCtx.style.display = 'none'; // Скрываем канвас, если нет данных
+            let p = document.createElement('p');
+            p.textContent = 'Нет данных для графика редкости.';
+            overallRarityCtx.parentNode.appendChild(p);
+        }
+
+        // Графики истории Pity для каждой группы баннеров
+        const bannerStatesData = JSON.parse('{{ banner_states | tojson | safe }}');
+        for (const banner_group_name in bannerStatesData) {
+            if (bannerStatesData.hasOwnProperty(banner_group_name)) {
+                const state = bannerStatesData[banner_group_name];
+                const pityHistoryForGroup = state.history_5_star; // Это массив объектов {pity_at: X, ...}
+
+                if (pityHistoryForGroup && pityHistoryForGroup.length > 0) {
+                    const canvasId = `pityHistoryLineChart_${banner_group_name}`;
+                    const ctx = document.getElementById(canvasId);
+                    if (ctx) {
+                        ctx.style.display = 'block'; // Показываем канвас
+                        const pityValues = pityHistoryForGroup.map(h => h.pity_at);
+                        const labels = pityHistoryForGroup.map((h, index) => `5★ #${index + 1}`);
+
+                        let groupTitle = banner_group_name.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: `История Pity 5★ (${groupTitle})`,
+                                    data: pityValues,
+                                    borderColor: getRandomColor(), // Функция для случайного цвета линии
+                                    tension: 0.1,
+                                    fill: false
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    y: {beginAtZero: true, title: {display: true, text: 'Pity (кол-во круток)'}},
+                                    x: {title: {display: true, text: 'Номер 5★ дропа'}}
+                                },
+                                plugins: {legend: {display: false}}
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
+        // Функция для получения случайного цвета для линий графиков
+        function getRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+    });
+</script>
 {% endblock %}
