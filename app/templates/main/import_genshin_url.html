@@ -1,0 +1,139 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Импорт истории молитв Genshin Impact</h2>
+    <p>Этот инструмент поможет вам импортировать историю ваших молитв из Genshin Impact.</p>
+
+    <h4>Шаг 1: Получите ссылку на историю молитв</h4>
+    <ol>
+        <li>Запустите Genshin Impact на вашем ПК.</li>
+        <li>Откройте в игре историю молитв (меню "Молитва" -> кнопка "История").</li>
+        <li>Подождите, пока история полностью загрузится.</li>
+        <li>
+            Скопируйте и выполните следующую команду в <strong>Windows PowerShell</strong>:
+            <pre><code id="psCommand"
+                       style="cursor: pointer; padding: 5px; background-color: #f0f0f0; border: 1px solid #ccc; display: inline-block;">Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex "&{$((New-Object System.Net.WebClient).DownloadString('https://gist.githubusercontent.com/Misha-Mayskiy/c4318cf9aaa4f6c93da914affe4312d5/raw/c0271b41860e4c17659e033834e2d7a4b7abed33/GetGenshinWishURL.ps1'))} global"</code></pre>
+            <button class="btn btn-sm btn-outline-secondary ml-2" onclick="copyCommand()">Копировать команду</button>
+            <p><small>Этот скрипт безопасно извлечет временную ссылку на вашу историю молитв и скопирует ее в буфер
+                обмена. Вы можете <a href="https://gist.githubusercontent.com/Misha-Mayskiy/c4318cf9aaa4f6c93da914affe4312d5/raw/c0271b41860e4c17659e033834e2d7a4b7abed33/GetGenshinWishURL.ps1" target="_blank">просмотреть
+                    исходный код скрипта здесь</a>.</small></p>
+        </li>
+        <li>После выполнения команды в PowerShell, ссылка будет скопирована в ваш буфер обмена.</li>
+    </ol>
+
+    <h4>Шаг 2: Вставьте ссылку и импортируйте</h4>
+    <form id="importUrlForm">
+        <div class="form-group">
+            <label for="wishHistoryUrl">Вставьте ссылку сюда:</label>
+            <textarea class="form-control" id="wishHistoryUrl" name="wish_history_url" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Импортировать данные</button>
+    </form>
+
+    <div id="importResult" class="mt-3" style="display:none;">
+        <h4>Результат импорта:</h4>
+        <p id="resultMessage"></p>
+        <p>Вставлено записей: <span id="resultInserted"></span></p>
+        <p>Пропущено записей (дубликаты/ошибки): <span id="resultSkipped"></span></p>
+        <div id="resultFetchErrorsContainer" style="display:none;">
+            <strong>Ошибки при получении данных от Hoyoverse:</strong>
+            <ul id="resultFetchErrorsList"></ul>
+        </div>
+        <div id="resultProcessingErrorsContainer" style="display:none;">
+            <strong>Ошибки при обработке/сохранении данных:</strong>
+            <ul id="resultProcessingErrorsList"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyCommand() {
+        const commandText = document.getElementById('psCommand').innerText;
+        navigator.clipboard.writeText(commandText).then(function () {
+            alert('Команда скопирована в буфер обмена!');
+        }, function (err) {
+            alert('Не удалось скопировать команду. Пожалуйста, скопируйте вручную.');
+            console.error('Async: Could not copy text: ', err);
+        });
+    }
+
+    document.getElementById('importUrlForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const urlInput = document.getElementById('wishHistoryUrl');
+        const wishUrl = urlInput.value.trim();
+        const importResultDiv = document.getElementById('importResult');
+        const resultMessage = document.getElementById('resultMessage');
+        const resultInserted = document.getElementById('resultInserted');
+        const resultSkipped = document.getElementById('resultSkipped');
+
+        const fetchErrorsContainer = document.getElementById('resultFetchErrorsContainer');
+        const fetchErrorsList = document.getElementById('resultFetchErrorsList');
+        const processingErrorsContainer = document.getElementById('resultProcessingErrorsContainer');
+        const processingErrorsList = document.getElementById('resultProcessingErrorsList');
+
+        if (!wishUrl) {
+            alert('Пожалуйста, вставьте URL.');
+            return;
+        }
+
+        importResultDiv.style.display = 'block';
+        resultMessage.innerText = 'Идет обработка, пожалуйста, подождите... Это может занять некоторое время.';
+        resultInserted.innerText = '-';
+        resultSkipped.innerText = '-';
+        fetchErrorsContainer.style.display = 'none';
+        fetchErrorsList.innerHTML = '';
+        processingErrorsContainer.style.display = 'none';
+        processingErrorsList.innerHTML = '';
+
+
+        fetch("{{ url_for('import_data_api.import_genshin_from_url') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({wish_history_url: wishUrl})
+        })
+            .then(response => {
+                if (!response.ok) {
+                    // Пытаемся получить JSON с ошибкой от нашего API
+                    return response.json().then(errData => {
+                        throw new Error(errData.message || `Ошибка сервера: ${response.status}`);
+                    }).catch(() => {
+                        // Если тело ответа не JSON или пустое
+                        throw new Error(`Ошибка сервера: ${response.status} ${response.statusText}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                resultMessage.innerText = data.message || 'Обработка завершена.';
+                resultInserted.innerText = data.inserted !== undefined ? data.inserted : '-';
+                resultSkipped.innerText = data.skipped !== undefined ? data.skipped : '-';
+
+                if (data.fetch_api_errors && data.fetch_api_errors.length > 0) {
+                    fetchErrorsContainer.style.display = 'block';
+                    data.fetch_api_errors.forEach(err => {
+                        const li = document.createElement('li');
+                        li.textContent = err;
+                        fetchErrorsList.appendChild(li);
+                    });
+                }
+                if (data.processing_db_errors && data.processing_db_errors.length > 0) {
+                    processingErrorsContainer.style.display = 'block';
+                    data.processing_db_errors.forEach(err => {
+                        const li = document.createElement('li');
+                        li.textContent = err;
+                        processingErrorsList.appendChild(li);
+                    });
+                }
+                urlInput.value = ''; // Очищаем поле ввода
+            })
+            .catch(error => {
+                resultMessage.innerText = `Произошла ошибка: ${error.message}`;
+                console.error('Ошибка:', error);
+            });
+    });
+</script>
+{% endblock %}

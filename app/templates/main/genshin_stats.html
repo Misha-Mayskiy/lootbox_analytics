@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Статистика Genshin Impact для {{ current_user.username }}</h2>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <h4>Общая статистика:</h4>
+            <p>Всего сделано молитв: <strong>{{ total_pulls }}</strong></p>
+            <ul>
+                <li>5★ предметы: {{ rarity_counts['5'] }}</li>
+                <li>4★ предметы: {{ rarity_counts['4'] }}</li>
+                <li>3★ предметы: {{ rarity_counts['3'] }}</li>
+            </ul>
+        </div>
+        <div class="col-md-8">
+            <h4>Pity трекеры (упрощенно):</h4>
+            {% if pity_data.character_event_5_star %}
+            <p><strong>Ивентовый баннер персонажа (5★):</strong>
+                Сделано после последней 5★: {{ pity_data.character_event_5_star.current_pity }} / {{
+                pity_data.character_event_5_star.guarantee_at }}
+            </p>
+            <p><strong>Ивентовый баннер персонажа (4★):</strong>
+                Сделано после последней 4★: {{ pity_data.character_event_4_star.current_pity }} / {{
+                pity_data.character_event_4_star.guarantee_at }}
+            </p>
+            {% endif %}
+            {% if pity_data.standard_banner_5_star %}
+            <p><strong>Стандартный баннер (5★):</strong>
+                Сделано после последней 5★: {{ pity_data.standard_banner_5_star.current_pity }} / {{
+                pity_data.standard_banner_5_star.guarantee_at }}
+            </p>
+            {% endif %}
+            <p><small>Примечание: Pity для оружейного баннера и полный учет 50/50 не реализованы в этой базовой
+                версии.</small></p>
+        </div>
+    </div>
+
+    <h4 class="mt-4">Последние 10 молитв:</h4>
+    {% if latest_drops %}
+    <ul class="list-group">
+        {% for drop in latest_drops %}
+        <li class="list-group-item">
+            <strong>{{ drop.item_name }}</strong> ({{ drop.item_rarity_text }}★) -
+            Тип: {{ drop.item_type_text }} -
+            Баннер: {{ drop.lootbox_type.name }} -
+            Время: {{ drop.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>Нет данных о молитвах.</p>
+    {% endif %}
+
+    <h4 class="mt-4">Пример списка всех молитв (первые 20):</h4>
+    {% if drops_list %}
+    <table class="table table-striped table-sm mt-3">
+        <thead>
+        <tr>
+            <th>Время</th>
+            <th>Предмет</th>
+            <th>Редкость</th>
+            <th>Тип</th>
+            <th>Баннер</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for drop in drops_list %}
+        <tr>
+            <td>{{ drop.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ drop.item_name }}</td>
+            <td>{{ drop.item_rarity_text }}★</td>
+            <td>{{ drop.item_type_text }}</td>
+            <td>{{ drop.lootbox_type.name }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Нет данных для отображения.</p>
+    {% endif %}
+    <p><a href="{{ url_for('main.genshin_import_url_page') }}" class="btn btn-info mt-3">Импортировать еще данные</a>
+    </p>
+</div>
+{% endblock %}
