@@ -12,7 +12,6 @@
                 4★: {{ rarity_counts_overall['4'] }} |
                 3★: {{ rarity_counts_overall['3'] }}
             </p>
-            <!-- Сюда позже добавим график Pie Chart для rarity_counts_overall -->
             <div style="width: 300px; margin: auto;">
                 <canvas id="overallRarityPieChart"></canvas>
             </div>
@@ -60,6 +59,17 @@
                 Процент выигрышей 50/50: <strong>{{ state.win_rate_50_50 }}%</strong>
                 <small> (Выиграно: {{ state.wins_50_50 }}, Проиграно: {{ state.losses_50_50 }})</small>
             </p>
+            <div class="col-md-12 mt-3"> {# Можно разместить под текстовой статистикой 50/50 #}
+                <h6>Статистика 50/50 (для 5★):</h6>
+                {% if state.wins_50_50 + state.losses_50_50 > 0 %}
+                <div style="width: 250px; height: 250px; margin: auto;">
+                    <canvas id="fiftyFiftyChart_{{ banner_group_name }}"></canvas>
+                </div>
+                {% else %}
+                <p class="text-muted"><small>Недостаточно данных (нужен хотя бы один 5★, где сработал 50/50).</small>
+                </p>
+                {% endif %}
+            </div>
             {% endif %}
             {% endif %}
 
@@ -77,6 +87,17 @@
                 <li class="list-inline-item">На hard-pity/позже: <span class="badge badge-warning">{{ state.pity_luck_5_star.hard_pity }}</span>
                 </li>
             </ul>
+            {% if state.pity_luck_5_star and state.pity_luck_5_star.total > 0 %}
+            <div class="col-md-12 mt-3">
+                <h6>Распределение 5★ по зонам Pity:</h6>
+                <div style="max-height: 300px; margin: auto;"> {# Ограничиваем высоту для Bar chart #}
+                    <canvas id="pityZoneChart_{{ banner_group_name }}"></canvas>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-muted"><small>Нет данных для отображения графика распределения по зонам pity (не было 5★
+                дропов в этой группе).</small></p>
+            {% endif %}
             {% endif %}
         </div>
 
@@ -136,89 +157,17 @@
 
 <!-- Скрипты для графиков Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Передача данных из Flask в JavaScript через глобальный объект window -->
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Общий график редкости
-        const overallRarityCtx = document.getElementById('overallRarityPieChart');
-        const overallRarityData = JSON.parse('{{ rarity_counts_overall | default({}, true) | tojson | safe }}');
-        // Проверка, что данные не пустые
-        if (overallRarityCtx && Object.keys(overallRarityData).length > 0 && (overallRarityData['3'] || overallRarityData['4'] || overallRarityData['5'])) {
-            new Chart(overallRarityCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['5★ (' + (overallRarityData['5'] || 0) + ')', '4★ (' + (overallRarityData['4'] || 0) + ')', '3★ (' + (overallRarityData['3'] || 0) + ')'],
-                    datasets: [{
-                        label: 'Распределение по редкости',
-                        data: [overallRarityData['5'] || 0, overallRarityData['4'] || 0, overallRarityData['3'] || 0],
-                        backgroundColor: ['gold', 'purple', 'dodgerblue'],
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {legend: {position: 'bottom'}}
-                }
-            });
-        } else if (overallRarityCtx) {
-            overallRarityCtx.style.display = 'none'; // Скрываем канвас, если нет данных
-            let p = document.createElement('p');
-            p.textContent = 'Нет данных для графика редкости.';
-            overallRarityCtx.parentNode.appendChild(p);
-        }
-
-        // Графики истории Pity для каждой группы баннеров
-        const bannerStatesData = JSON.parse('{{ banner_states | tojson | safe }}');
-        for (const banner_group_name in bannerStatesData) {
-            if (bannerStatesData.hasOwnProperty(banner_group_name)) {
-                const state = bannerStatesData[banner_group_name];
-                const pityHistoryForGroup = state.history_5_star; // Это массив объектов {pity_at: X, ...}
-
-                if (pityHistoryForGroup && pityHistoryForGroup.length > 0) {
-                    const canvasId = `pityHistoryLineChart_${banner_group_name}`;
-                    const ctx = document.getElementById(canvasId);
-                    if (ctx) {
-                        ctx.style.display = 'block'; // Показываем канвас
-                        const pityValues = pityHistoryForGroup.map(h => h.pity_at);
-                        const labels = pityHistoryForGroup.map((h, index) => `5★ #${index + 1}`);
-
-                        let groupTitle = banner_group_name.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-
-
-                        new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: labels,
-                                datasets: [{
-                                    label: `История Pity 5★ (${groupTitle})`,
-                                    data: pityValues,
-                                    borderColor: getRandomColor(), // Функция для случайного цвета линии
-                                    tension: 0.1,
-                                    fill: false
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                scales: {
-                                    y: {beginAtZero: true, title: {display: true, text: 'Pity (кол-во круток)'}},
-                                    x: {title: {display: true, text: 'Номер 5★ дропа'}}
-                                },
-                                plugins: {legend: {display: false}}
-                            }
-                        });
-                    }
-                }
-            }
-        }
-
-        // Функция для получения случайного цвета для линий графиков
-        function getRandomColor() {
-            var letters = '0123456789ABCDEF';
-            var color = '#';
-            for (var i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
-        }
-    });
+    window.chartData = {
+        overallRarityData: {{ rarity_counts_overall | default({}, true) | tojson | safe }},
+        bannerStatesData: {{ banner_states | tojson | safe }}
+    };
 </script>
+
+<!-- Подключение внешнего файла JavaScript для графиков -->
+<script src="{{ url_for('static', filename='js/genshin_stats_charts.js') }}"></script>
+
+
 {% endblock %}

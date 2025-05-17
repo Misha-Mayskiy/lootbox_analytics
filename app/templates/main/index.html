@@ -1,18 +1,55 @@
 {% extends "layout.html" %}
 
+{% block head_extra %} {# Новый блок для подключения специфичных CSS #}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing_page.css') }}">
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h1>Добро пожаловать в Lootbox Analytics!</h1>
-    <p>Анализируй свою удачу в любимых играх.</p>
-    {% if current_user.is_anonymous %}
-    <p>
-        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Войти</a>
-        <a href="{{ url_for('auth.register') }}" class="btn btn-secondary">Зарегистрироваться</a>
-    </p>
-    {% else %}
-    <p>
-        <a href="{{ url_for('main.dashboard') }}" class="btn btn-success">Перейти в Дашборд</a>
-    </p>
-    {% endif %}
+<div class="landing-hero">
+    <div class="container">
+        <h1>Анализируй свою удачу в любимых играх!</h1>
+        <p class="lead">Lootbox Analytics – твой персональный помощник для отслеживания статистики открытий лутбоксов,
+            кейсов и молитв. Узнай, насколько ты везуч!</p>
+        <div class="landing-actions">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Начать</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-secondary btn-lg">Уже есть аккаунт? Войти</a>
+        </div>
+        <div class="supported-games">
+            <p>Поддерживаем (пока): Genshin Impact</p>
+            <p>Скоро: CS2, Honkai: Star Rail, Hearthstone</p>
+        </div>
+    </div>
 </div>
+
+<section class="landing-features">
+    <div class="container">
+        <h2>Ключевые Возможности</h2>
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon">📊</div>
+                <h3>Детальная Статистика</h3>
+                <p>Отслеживай Pity, шансы 50/50, историю дропов и многое другое для Genshin Impact.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">💡</div>
+                <h3>Анализ Удачи</h3>
+                <p>Узнай свой "Индекс Удачи", сравнивай свои результаты и понимай, когда ожидать редкие предметы.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">⚙️</div>
+                <h3>Простой Импорт</h3>
+                <p>Легко импортируй данные из Genshin Impact с помощью нашего скрипта.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="landing-cta">
+    <div class="container">
+        <h2>Готов Узнать Свою Удачу?</h2>
+        <p>Присоединяйся к Lootbox Analytics прямо сейчас и начни свой путь к полному пониманию своих игровых
+            результатов!</p>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Зарегистрироваться</a>
+    </div>
+</section>
 {% endblock %}

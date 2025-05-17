@@ -1,3 +1,35 @@
+:root {
+    --bg-color: #f4f4f4;
+    --text-color: #333;
+    --nav-bg-color: #e9ecef;
+    --nav-text-color: #333;
+    --nav-link-color: #19569e;
+    --nav-link-hover-color: #0056b3;
+    --card-bg-color: #ffffff;
+    --border-color: #dee2e6;
+    --link-color: #007bff;
+    --link-hover-color: #0056b3;
+    --button-primary-bg: #007bff;
+    --button-primary-text: #fff;
+    --nav-link-hover-bg: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] {
+    --bg-color: #22272e; /* GitHub Dark Dimmed background */
+    --text-color: #adbac7; /* GitHub Dark Dimmed text */
+    --nav-bg-color: #2d333b; /* GitHub Dark Dimmed header */
+    --nav-text-color: #adbac7;
+    --nav-link-color: #539bf5; /* GitHub Dark Dimmed link */
+    --nav-link-hover-color: #80b6f8;
+    --card-bg-color: #2d333b; /* GitHub Dark Dimmed card/border */
+    --border-color: #444c56; /* GitHub Dark Dimmed border */
+    --link-color: #539bf5;
+    --link-hover-color: #80b6f8;
+    --button-primary-bg: #377ef0;
+    --button-primary-text: #fff;
+    --nav-link-hover-bg: rgba(255, 255, 255, 0.1);
+}
+
 .rarity-5 {
     border-left: 5px solid gold !important;
     background-color: rgba(255, 215, 0, 0.1); /* легкий золотой фон */
@@ -11,4 +43,329 @@
 .rarity-3 {
     border-left: 5px solid dodgerblue !important;
     background-color: rgba(30, 144, 255, 0.05); /* легкий голубой фон */
+}
+
+/* Общие стили */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color); /* Для тем */
+    color: var(--text-color); /* Для тем */
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+    padding: 0 20px;
+}
+
+nav {
+    background: var(--nav-bg-color);
+    color: var(--nav-text-color);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-links a, .nav-user-actions a, .nav-user-actions .nav-username {
+    color: var(--nav-link-color);
+    text-decoration: none;
+    padding: 8px 12px;
+    margin-right: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
+    display: inline-block;
+}
+
+.nav-links a:first-child {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.nav-links a:hover, .nav-user-actions a:hover {
+    color: var(--nav-link-hover-color);
+    background-color: var(--nav-link-hover-bg, rgba(0, 0, 0, 0.05));
+}
+
+[data-theme="dark"] .nav-links a:hover,
+[data-theme="dark"] .nav-user-actions a:hover {
+    background-color: var(--nav-link-hover-bg, rgba(255, 255, 255, 0.1));
+}
+
+.nav-user-actions {
+    display: flex;
+    align-items: center;
+}
+
+.nav-user-actions .nav-username {
+    margin-right: 15px;
+    padding: 8px 12px;
+}
+
+nav a {
+    color: var(--nav-link-color);
+    text-decoration: none;
+    padding: 5px 15px;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: var(--nav-link-hover-color);
+}
+
+/* Карточки (если используем) */
+.card {
+    background-color: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Легкая тень для светлой темы */
+}
+
+.col-md-6 {
+    margin-top: 10px;
+}
+
+.game-card-placeholder .card-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.game-icon-card {
+    width: 32px; /* Размер иконки в карточке */
+    height: 32px;
+    margin-right: 10px;
+    /* Стили для самих иконок SVG/PNG */
+}
+
+.game-card-placeholder .card-text {
+    font-size: 0.9em;
+    min-height: 60px; /* Чтобы карточки были примерно одной высоты по тексту */
+}
+
+.game-card-placeholder .disabled {
+    pointer-events: none;
+    opacity: 0.65;
+}
+
+/* Дополнительные стили для кнопок, форм и т.д. с использованием переменных */
+.btn-primary {
+    background-color: var(--button-primary-bg);
+    color: var(--button-primary-text);
+    border: none;
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+a {
+    color: var(--link-color);
+}
+
+a:hover {
+    color: var(--link-hover-color);
+}
+
+/* Стили для таблиц, если используем Bootstrap, они уже есть */
+/* Если нет, можно добавить базовые стили */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+}
+
+th, td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-top: 1px solid var(--border-color);
+    text-align: left;
+}
+
+thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, .03); /* Легкая полоска для светлой темы */
+}
+
+[data-theme="dark"] .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, .03); /* Легкая полоска для темной темы */
+}
+
+
+/* Стили для всплывающих сообщений Flask (flash) */
+.alert {
+    padding: 15px;
+    margin-bottom: 0;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+}
+
+.alert-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
+
+.alert-api-key {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    text-align: left;
+}
+
+[data-theme="dark"] .alert-success {
+    color: #a3cfbb;
+    background-color: #2d4836;
+    border-color: #3c5c46;
+}
+
+[data-theme="dark"] .alert-danger {
+    color: #f2b8bc;
+    background-color: #5e2a2e;
+    border-color: #7c3e42;
+}
+
+[data-theme="dark"] .alert-info {
+    color: #9FDDF3;
+    background-color: #234956;
+    border-color: #346879;
+}
+
+[data-theme="dark"] .alert-warning {
+    color: #f7e3a1;
+    background-color: #665323;
+    border-color: #897030;
+}
+
+[data-theme="dark"] .alert-api-key {
+    color: #9FDDF3;
+    background-color: #234956;
+    border-color: #346879;
+    text-align: left;
+}
+
+.theme-switch {
+    display: inline-block;
+    height: 24px;
+    position: relative;
+    width: 50px;
+    margin-bottom: 0;
+}
+
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    background-color: #ccc;
+    bottom: 0;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: .4s;
+    display: flex; /* Для иконок */
+    align-items: center; /* Для иконок */
+    justify-content: space-around; /* Для иконок */
+    padding: 0 3px; /* Отступы для иконок */
+}
+
+.slider:before {
+    background-color: white;
+    bottom: 3px; /* Позиционирование кружка */
+    content: "";
+    height: 18px; /* Размер кружка */
+    left: 3px; /* Позиционирование кружка */
+    position: absolute;
+    transition: .4s;
+    width: 18px; /* Размер кружка */
+}
+
+input:checked + .slider {
+    background-color: #217922; /* Цвет фона слайдера в темной теме */
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px); /* Сдвиг кружка */
+}
+
+.slider.round {
+    border-radius: 24px; /* Радиус слайдера */
+}
+
+.slider.round:before {
+    border-radius: 50%; /* Круглый переключатель */
+}
+
+.sun-icon, .moon-icon {
+    font-size: 12px; /* Размер иконок */
+    color: white;
+    opacity: 0.7;
+}
+
+input:checked + .slider .sun-icon {
+    opacity: 0; /* Скрываем солнце в темной теме */
+}
+
+input:not(:checked) + .slider .moon-icon {
+    opacity: 0; /* Скрываем луну в светлой теме */
+}
+
+[data-theme="dark"] .slider .moon-icon { /* Чтобы луна была видна в темной теме */
+    color: #539bf5; /* Цвет луны в темной теме */
+    opacity: 1;
+}
+
+[data-theme="dark"] .slider .sun-icon {
+    opacity: 0;
+}
+
+:root .slider .sun-icon { /* Чтобы солнце было видно в светлой теме по умолчанию */
+    color: orange;
+    opacity: 1;
+}
+
+:root .slider .moon-icon {
+    opacity: 0;
 }

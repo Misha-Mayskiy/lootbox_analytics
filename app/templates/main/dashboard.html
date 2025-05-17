@@ -6,7 +6,7 @@
     <p>Добро пожаловать в ваш личный кабинет!</p>
 
     {% if current_user.api_key %}
-    <div class="alert alert-info">
+    <div class="alert alert-api-key">
         Ваш API Key: <code>{{ current_user.api_key }}</code>
     </div>
     {% endif %}
@@ -15,7 +15,11 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Genshin Impact</h5>
+                    <h5 class="card-title">
+                        <img src="{{ url_for('static', filename='img/game_icons/genshin-impact.svg') }}"
+                             alt="Genshin Impact" class="game-icon-card">
+                        Genshin Impact
+                    </h5>
                     <p class="card-text">Просмотр статистики и импорт данных для Genshin Impact.</p>
                     <a href="{{ url_for('main.genshin_stats_page') }}" class="btn btn-primary">Перейти к статистике
                         Genshin</a>
@@ -24,18 +28,47 @@
                 </div>
             </div>
         </div>
-        <!-- Здесь в будущем будут карточки для других игр, например CS2 -->
-        <!--
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">CS2</h5>
-                    <p class="card-text">Просмотр инвентаря и ROI для CS2.</p>
-                    <a href="#" class="btn btn-primary disabled">Статистика CS2 (в разработке)</a>
+        <div class="row mt-3">
+            <div class="col-md-6 col-lg-4 mb-3"> {# col-lg-4 для 3 карточек в ряд на больших экранах #}
+                <div class="card game-card-placeholder">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <img src="{{ url_for('static', filename='img/game_icons/counter-strike.svg') }}"
+                                 alt="CS2" class="game-icon-card">
+                            Counter-Strike 2
+                        </h5>
+                        <p class="card-text text-muted">Анализ стоимости инвентаря и ROI от открытия кейсов.</p>
+                        <a href="#" class="btn btn-outline-secondary disabled" aria-disabled="true">В разработке</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card game-card-placeholder">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <img src="{{ url_for('static', filename='img/game_icons/honkai-star-rail.svg') }}"
+                                 alt="Honkai: Star Rail" class="game-icon-card">
+                            Honkai: Star Rail
+                        </h5>
+                        <p class="card-text text-muted">Отслеживание Прыжков, pity-системы и анализ удачи.</p>
+                        <a href="#" class="btn btn-outline-secondary disabled" aria-disabled="true">В разработке</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card game-card-placeholder">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <img src="{{ url_for('static', filename='img/game_icons/hearthstone.svg') }}"
+                                 alt="Hearthstone" class="game-icon-card">
+                            Hearthstone
+                        </h5>
+                        <p class="card-text text-muted">Статистика открытия паков карт и сбор коллекции.</p>
+                        <a href="#" class="btn btn-outline-secondary disabled" aria-disabled="true">В разработке</a>
+                    </div>
                 </div>
             </div>
         </div>
-        -->
     </div>
 </div>
 {% endblock %}

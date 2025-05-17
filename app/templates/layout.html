@@ -8,21 +8,54 @@
     {% else %}
     <title>Lootbox Analytics</title>
     {% endif %}
+    <script>
+        (function () {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else if (theme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            } else {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head_extra %}{% endblock %}
 </head>
 <body>
 <nav>
-    <a href="{{ url_for('main.index') }}">Главная</a>
-    {% if current_user.is_anonymous %}
-    <a href="{{ url_for('auth.login') }}">Войти</a>
-    <a href="{{ url_for('auth.register') }}">Регистрация</a>
-    {% else %}
-    <a href="{{ url_for('main.dashboard') }}">Дашборд</a>
-    <a href="{{ url_for('auth.logout') }}">Выйти ({{ current_user.username }})</a>
-    {% endif %}
+    <div class="container nav-container">
+        <div class="nav-links">
+            <a href="{{ url_for('main.index') }}">Lootbox Analytics</a>
+            {% if current_user.is_anonymous %}
+            {% else %}
+            <a href="{{ url_for('main.dashboard') }}">Дашборд</a>
+            {% endif %}
+        </div>
+        <div class="nav-user-actions">
+            {% if current_user.is_authenticated %}
+            <span class="nav-username">Привет, {{ current_user.username }}!</span>
+            <a href="{{ url_for('auth.logout') }}">Выйти</a>
+            {% else %}
+            <a href="{{ url_for('auth.login') }}">Войти</a>
+            <a href="{{ url_for('auth.register') }}">Регистрация</a>
+            {% endif %}
+            <div class="theme-switch-wrapper">
+                <label class="theme-switch" for="themeCheckbox">
+                    <input type="checkbox" id="themeCheckbox"/>
+                    <div class="slider round">
+                        <span class="sun-icon"></span>
+                        <span class="moon-icon"></span>
+                    </div>
+                </label>
+            </div>
+        </div>
+    </div>
 </nav>
-<hr>
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
 {% for category, message in messages %}
@@ -31,5 +64,6 @@
 {% endif %}
 {% endwith %}
 {% block content %}{% endblock %}
+<script src="{{ url_for('static', filename='js/theme_switcher.js') }}"></script>
 </body>
 </html>

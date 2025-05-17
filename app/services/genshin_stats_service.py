@@ -217,9 +217,10 @@ class GenshinPityTracker:
     def _analyze_pity_luck(self, history_5_star, soft_pity_start, hard_pity_limit):
         """Анализирует историю 5* дропов на предмет ранних/поздних выпадений."""
         if not history_5_star:
-            return {'early': 0, 'soft_pity_zone': 0, 'hard_pity': 0, 'total': 0}
+            return {'early': 0, 'soft_pity_zone': 0, 'hard_pity': 0, 'total': 0, 'soft_pity_start_val': soft_pity_start}
 
-        luck_stats = {'early': 0, 'soft_pity_zone': 0, 'hard_pity': 0, 'total': len(history_5_star)}
+        luck_stats = {'early': 0, 'soft_pity_zone': 0, 'hard_pity': 0, 'total': len(history_5_star),
+                      'soft_pity_start_val': soft_pity_start}
         for drop_info in history_5_star:
             pity = drop_info['pity_at']
             if pity < soft_pity_start:

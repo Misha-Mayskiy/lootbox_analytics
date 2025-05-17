@@ -1,0 +1,48 @@
+document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('themeCheckbox');
+    const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+
+    if (currentTheme) {
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        if (currentTheme === 'dark') {
+            if (themeToggle) themeToggle.checked = true;
+        }
+    } else {
+        // Если тема не сохранена, проверяем системные настройки
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            if (themeToggle) themeToggle.checked = true;
+        } else {
+            // По умолчанию светлая, если нет сохраненной и системная не темная
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    }
+
+
+    if (themeToggle) {
+        themeToggle.addEventListener('change', function (event) {
+            if (event.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    }
+
+    // Слушаем изменения системной темы
+    const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
+    darkThemeMq.addEventListener('change', e => {
+        // Если тема не была явно выбрана пользователем и сохранена
+        if (!localStorage.getItem('theme')) {
+            if (e.matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                if (themeToggle) themeToggle.checked = true;
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                if (themeToggle) themeToggle.checked = false;
+            }
+        }
+    });
+});

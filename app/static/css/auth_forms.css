@@ -1,0 +1,187 @@
+.auth-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh; /* Чтобы форма была по центру экрана */
+    padding: 20px;
+}
+
+.auth-form-wrapper {
+    background-color: var(--card-bg-color);
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 450px; /* Максимальная ширина формы */
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .auth-form-wrapper {
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3); /* Более заметная тень для темной темы */
+}
+
+
+.auth-title {
+    text-align: center;
+    font-size: 1.8em;
+    margin-bottom: 25px;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.auth-form .form-group {
+    margin-bottom: 20px;
+}
+
+.auth-form .form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: var(--text-color-secondary, #555);
+}
+
+[data-theme="dark"] .auth-form .form-label {
+    --text-color-secondary: #a0a0a0;
+}
+
+
+.auth-form .form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--input-border-color, #ced4da);
+    border-radius: 4px;
+    box-sizing: border-box; /* Чтобы padding не увеличивал ширину */
+    background-color: var(--input-bg-color, #fff);
+    color: var(--input-text-color, #495057);
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+[data-theme="dark"] .auth-form .form-control {
+    --input-border-color: #545d68;
+    --input-bg-color: #373e47;
+    --input-text-color: #e0e0e0;
+}
+
+
+.auth-form .form-control:focus {
+    border-color: var(--input-focus-border-color, #80bdff);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem var(--input-focus-shadow-color, rgba(0, 123, 255, .25));
+}
+
+[data-theme="dark"] .auth-form .form-control:focus {
+    --input-focus-border-color: #539bf5;
+    --input-focus-shadow-color: rgba(83, 155, 245, .25);
+}
+
+
+.auth-form .form-control.is-invalid {
+    border-color: #dc3545; /* Цвет ошибки Bootstrap */
+}
+
+[data-theme="dark"] .auth-form .form-control.is-invalid {
+    border-color: #f47070;
+}
+
+.auth-form .invalid-feedback {
+    display: block; /* Чтобы всегда было место под ошибку */
+    width: 100%;
+    margin-top: .25rem;
+    font-size: .875em;
+    color: #dc3545; /* Цвет ошибки Bootstrap */
+}
+
+[data-theme="dark"] .auth-form .invalid-feedback {
+    color: #f47070;
+}
+
+
+.auth-form .form-check {
+    display: flex;
+    align-items: center;
+}
+
+.auth-form .form-check-input {
+    margin-right: 8px;
+    margin-top: 0; /* Убрать дефолтный отступ */
+}
+
+.auth-form .form-check-label {
+    margin-bottom: 0; /* Убрать дефолтный отступ */
+}
+
+.auth-form .btn-block {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.05em;
+}
+
+.auth-divider {
+    margin: 25px 0;
+    border: 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.auth-options {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.auth-options p {
+    margin-bottom: 10px;
+    font-size: 0.9em;
+    color: var(--text-color-secondary);
+}
+
+.auth-options .btn-steam {
+    background-color: #1b2838; /* Steam цвет */
+    color: white;
+    display: flex; /* Для иконки и текста */
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-options .btn-steam:hover {
+    background-color: #273951;
+}
+
+[data-theme="dark"] .auth-options .btn-steam {
+    background-color: #2a3f5a;
+}
+
+[data-theme="dark"] .auth-options .btn-steam:hover {
+    background-color: #3c5679;
+}
+
+
+.auth-links {
+    text-align: center;
+    font-size: 0.9em;
+}
+
+.auth-links p {
+    margin-bottom: 5px;
+}
+
+.auth-flash-message {
+    margin-bottom: 15px;
+}
+
+/* Добавление CSS переменных для инпутов */
+:root {
+    /* ... существующие ... */
+    --input-border-color: #ced4da;
+    --input-bg-color: #fff;
+    --input-text-color: #495057;
+    --input-focus-border-color: #80bdff;
+    --input-focus-shadow-color: rgba(0, 123, 255, .25);
+}
+
+[data-theme="dark"] {
+    /* ... существующие ... */
+    --input-border-color: #545d68;
+    --input-bg-color: #373e47;
+    --input-text-color: #e0e0e0;
+    --input-focus-border-color: #539bf5;
+    --input-focus-shadow-color: rgba(83, 155, 245, .25);
+}
