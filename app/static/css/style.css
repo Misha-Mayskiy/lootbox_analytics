@@ -32,17 +32,17 @@
 
 .rarity-5 {
     border-left: 5px solid gold !important;
-    background-color: rgba(255, 215, 0, 0.1); /* легкий золотой фон */
+    background-color: rgba(255, 215, 0, 0.1);
 }
 
 .rarity-4 {
     border-left: 5px solid purple !important;
-    background-color: rgba(128, 0, 128, 0.1); /* легкий фиолетовый фон */
+    background-color: rgba(128, 0, 128, 0.1);
 }
 
 .rarity-3 {
     border-left: 5px solid dodgerblue !important;
-    background-color: rgba(30, 144, 255, 0.05); /* легкий голубой фон */
+    background-color: rgba(30, 144, 255, 0.05);
 }
 
 /* Общие стили */
@@ -51,8 +51,8 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 0;
-    background-color: var(--bg-color); /* Для тем */
-    color: var(--text-color); /* Для тем */
+    background-color: var(--bg-color);
+    color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
 }
 
@@ -122,14 +122,13 @@ nav a:hover {
     color: var(--nav-link-hover-color);
 }
 
-/* Карточки (если используем) */
 .card {
     background-color: var(--card-bg-color);
     border: 1px solid var(--border-color);
     border-radius: 5px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Легкая тень для светлой темы */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .col-md-6 {
@@ -143,15 +142,14 @@ nav a:hover {
 }
 
 .game-icon-card {
-    width: 32px; /* Размер иконки в карточке */
+    width: 32px;
     height: 32px;
     margin-right: 10px;
-    /* Стили для самих иконок SVG/PNG */
 }
 
 .game-card-placeholder .card-text {
     font-size: 0.9em;
-    min-height: 60px; /* Чтобы карточки были примерно одной высоты по тексту */
+    min-height: 60px;
 }
 
 .game-card-placeholder .disabled {
@@ -159,7 +157,6 @@ nav a:hover {
     opacity: 0.65;
 }
 
-/* Дополнительные стили для кнопок, форм и т.д. с использованием переменных */
 .btn-primary {
     background-color: var(--button-primary-bg);
     color: var(--button-primary-text);
@@ -182,8 +179,6 @@ a:hover {
     color: var(--link-hover-color);
 }
 
-/* Стили для таблиц, если используем Bootstrap, они уже есть */
-/* Если нет, можно добавить базовые стили */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -203,11 +198,11 @@ thead th {
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(0, 0, 0, .03); /* Легкая полоска для светлой темы */
+    background-color: rgba(0, 0, 0, .03);
 }
 
 [data-theme="dark"] .table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(255, 255, 255, .03); /* Легкая полоска для темной темы */
+    background-color: rgba(255, 255, 255, .03);
 }
 
 
@@ -305,55 +300,55 @@ thead th {
     right: 0;
     top: 0;
     transition: .4s;
-    display: flex; /* Для иконок */
-    align-items: center; /* Для иконок */
-    justify-content: space-around; /* Для иконок */
-    padding: 0 3px; /* Отступы для иконок */
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 3px;
 }
 
 .slider:before {
     background-color: white;
-    bottom: 3px; /* Позиционирование кружка */
+    bottom: 3px;
     content: "";
-    height: 18px; /* Размер кружка */
-    left: 3px; /* Позиционирование кружка */
-    position: absolute;
+    height: 18px;
+    left: 3px;
+/ position: absolute;
     transition: .4s;
-    width: 18px; /* Размер кружка */
+    width: 18px;
 }
 
 input:checked + .slider {
-    background-color: #217922; /* Цвет фона слайдера в темной теме */
+    background-color: #217922;
 }
 
 input:checked + .slider:before {
-    transform: translateX(26px); /* Сдвиг кружка */
+    transform: translateX(26px);
 }
 
 .slider.round {
-    border-radius: 24px; /* Радиус слайдера */
+    border-radius: 24px;
 }
 
 .slider.round:before {
-    border-radius: 50%; /* Круглый переключатель */
+    border-radius: 50%;
 }
 
 .sun-icon, .moon-icon {
-    font-size: 12px; /* Размер иконок */
+    font-size: 12px;
     color: white;
     opacity: 0.7;
 }
 
 input:checked + .slider .sun-icon {
-    opacity: 0; /* Скрываем солнце в темной теме */
+    opacity: 0;
 }
 
 input:not(:checked) + .slider .moon-icon {
-    opacity: 0; /* Скрываем луну в светлой теме */
+    opacity: 0;
 }
 
-[data-theme="dark"] .slider .moon-icon { /* Чтобы луна была видна в темной теме */
-    color: #539bf5; /* Цвет луны в темной теме */
+[data-theme="dark"] .slider .moon-icon {
+    color: #539bf5;
     opacity: 1;
 }
 
@@ -361,7 +356,7 @@ input:not(:checked) + .slider .moon-icon {
     opacity: 0;
 }
 
-:root .slider .sun-icon { /* Чтобы солнце было видно в светлой теме по умолчанию */
+:root .slider .sun-icon {
     color: orange;
     opacity: 1;
 }

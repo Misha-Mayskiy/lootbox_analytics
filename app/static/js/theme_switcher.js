@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function () {
             document.documentElement.setAttribute('data-theme', 'dark');
             if (themeToggle) themeToggle.checked = true;
         } else {
-            // По умолчанию светлая, если нет сохраненной и системная не темная
             document.documentElement.setAttribute('data-theme', 'light');
         }
     }
@@ -31,10 +30,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Слушаем изменения системной темы
     const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
     darkThemeMq.addEventListener('change', e => {
-        // Если тема не была явно выбрана пользователем и сохранена
         if (!localStorage.getItem('theme')) {
             if (e.matches) {
                 document.documentElement.setAttribute('data-theme', 'dark');

@@ -100,11 +100,11 @@
         if not genshin:
             genshin = Game(name='Genshin Impact', slug='genshin')
             db.session.add(genshin)
-            db.session.commit() # Commit чтобы получить genshin.id
+            db.session.commit()
             print("Игра Genshin Impact добавлена.")
 
         # Добавление типов лутбоксов для Genshin
-        if genshin: # Убедимся, что игра существует
+        if genshin:
             lootbox_types_data = [
                 {'game_specific_id': '100', 'name': 'Баннер новичка'},
                 {'game_specific_id': '200', 'name': 'Стандартный баннер'},
@@ -119,7 +119,7 @@
                     db.session.add(new_lt)
             db.session.commit()
             print("Типы лутбоксов для Genshin Impact добавлены/проверены.")
-        exit() # Выход из shell
+        exit()
         ```
 
 7.  **Запустите Flask development server:**
@@ -172,4 +172,4 @@
 
 ## 📄 Лицензия
 
-Этот проект распространяется под лицензией MIT License. Подробнее см. файл `LICENSE`.
+Этот проект распространяется под лицензией GPL-3.0. Подробнее см. файл `LICENSE`.

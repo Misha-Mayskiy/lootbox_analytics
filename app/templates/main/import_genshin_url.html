@@ -16,7 +16,9 @@
                        style="cursor: pointer; padding: 5px; background-color: #f0f0f0; border: 1px solid #ccc; display: inline-block;">Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex "&{$((New-Object System.Net.WebClient).DownloadString('https://gist.githubusercontent.com/Misha-Mayskiy/c4318cf9aaa4f6c93da914affe4312d5/raw/c0271b41860e4c17659e033834e2d7a4b7abed33/GetGenshinWishURL.ps1'))} global"</code></pre>
             <button class="btn btn-sm btn-outline-secondary ml-2" onclick="copyCommand()">Копировать команду</button>
             <p><small>Этот скрипт безопасно извлечет временную ссылку на вашу историю молитв и скопирует ее в буфер
-                обмена. Вы можете <a href="https://gist.githubusercontent.com/Misha-Mayskiy/c4318cf9aaa4f6c93da914affe4312d5/raw/c0271b41860e4c17659e033834e2d7a4b7abed33/GetGenshinWishURL.ps1" target="_blank">просмотреть
+                обмена. Вы можете <a
+                        href="https://gist.githubusercontent.com/Misha-Mayskiy/c4318cf9aaa4f6c93da914affe4312d5/raw/c0271b41860e4c17659e033834e2d7a4b7abed33/GetGenshinWishURL.ps1"
+                        target="_blank">просмотреть
                     исходный код скрипта здесь</a>.</small></p>
         </li>
         <li>После выполнения команды в PowerShell, ссылка будет скопирована в ваш буфер обмена.</li>
@@ -97,11 +99,9 @@
         })
             .then(response => {
                 if (!response.ok) {
-                    // Пытаемся получить JSON с ошибкой от нашего API
                     return response.json().then(errData => {
                         throw new Error(errData.message || `Ошибка сервера: ${response.status}`);
                     }).catch(() => {
-                        // Если тело ответа не JSON или пустое
                         throw new Error(`Ошибка сервера: ${response.status} ${response.statusText}`);
                     });
                 }
@@ -128,7 +128,7 @@
                         processingErrorsList.appendChild(li);
                     });
                 }
-                urlInput.value = ''; // Очищаем поле ввода
+                urlInput.value = '';
             })
             .catch(error => {
                 resultMessage.innerText = `Произошла ошибка: ${error.message}`;

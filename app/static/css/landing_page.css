@@ -1,5 +1,5 @@
 .landing-hero {
-    background: var(--hero-bg-color, linear-gradient(135deg, #667eea 0%, #764ba2 100%)); /* Градиент по умолчанию */
+    background: var(--hero-bg-color, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
     color: var(--hero-text-color, #ffffff);
     padding: 80px 0;
     text-align: center;
@@ -10,7 +10,7 @@
 }
 
 [data-theme="dark"] .landing-hero {
-    --hero-bg-color: linear-gradient(135deg, #373b44 0%, #232526 100%); /* Темный градиент */
+    --hero-bg-color: linear-gradient(135deg, #373b44 0%, #232526 100%);
     --hero-text-color: #e0e0e0;
 }
 
@@ -18,7 +18,7 @@
     font-size: 3.5em;
     margin-bottom: 20px;
     font-weight: 700;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .landing-hero .lead {
@@ -39,20 +39,23 @@
 }
 
 .landing-actions .btn-secondary {
-    background-color: var(--button-secondary-bg, rgba(255,255,255,0.2));
+    background-color: var(--button-secondary-bg, rgba(255, 255, 255, 0.2));
     color: var(--button-secondary-text, #fff);
     border: 1px solid var(--button-secondary-border, #fff);
 }
+
 [data-theme="dark"] .landing-actions .btn-secondary {
-    --button-secondary-bg: rgba(255,255,255,0.1);
+    --button-secondary-bg: rgba(255, 255, 255, 0.1);
     --button-secondary-text: #e0e0e0;
     --button-secondary-border: #768390;
 }
+
 .landing-actions .btn-secondary:hover {
-    background-color: var(--button-secondary-hover-bg, rgba(255,255,255,0.3));
+    background-color: var(--button-secondary-hover-bg, rgba(255, 255, 255, 0.3));
 }
+
 [data-theme="dark"] .landing-actions .btn-secondary:hover {
-    background-color: var(--button-secondary-hover-bg, rgba(255,255,255,0.15));
+    background-color: var(--button-secondary-hover-bg, rgba(255, 255, 255, 0.15));
 }
 
 
@@ -60,29 +63,35 @@
     margin-top: 40px;
     font-size: 0.9em;
 }
+
 .supported-games p {
     margin-bottom: 5px;
 }
+
 .game-icon { /* Заглушка для иконок игр */
     display: inline-block;
     width: 20px;
     height: 20px;
-    background-color: #ccc; /* Замени на реальные иконки/спрайты */
+    background-color: #ccc;
     border-radius: 3px;
     vertical-align: middle;
     margin-left: 5px;
 }
-.genshin-icon { background-color: #ecd28c; } /* Пример цвета для Genshin */
+
+.genshin-icon {
+    background-color: #ecd28c;
+}
 
 
 /* Features Section */
 .landing-features {
     padding: 60px 0;
-    background-color: var(--section-bg-light, #ffffff); /* Фон для секции фич */
+    background-color: var(--section-bg-light, #ffffff);
     text-align: center;
 }
+
 [data-theme="dark"] .landing-features {
-    --section-bg-light: var(--card-bg-color); /* Используем цвет карточки для фона секции */
+    --section-bg-light: var(--card-bg-color);
 }
 
 
@@ -94,16 +103,15 @@
 
 .features-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Адаптивная сетка */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 30px;
 }
 
 .feature-item {
-    background-color: var(--card-bg-color); /* Используем цвет фона карточки */
+    background-color: var(--card-bg-color);
     padding: 30px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
-    /* box-shadow: 0 4px 8px rgba(0,0,0,0.05); Уже есть у .card, если наследуем */
     transition: transform 0.2s ease-in-out;
 }
 
@@ -112,9 +120,8 @@
 }
 
 .feature-icon {
-    font-size: 3em; /* Размер эмодзи/иконки */
+    font-size: 3em;
     margin-bottom: 15px;
-    /* Стили для реальных иконок (SVG, Font Awesome) будут другими */
 }
 
 .feature-item h3 {
@@ -125,22 +132,23 @@
 
 .feature-item p {
     font-size: 1em;
-    color: var(--text-color-secondary, #666); /* Второстепенный текст */
+    color: var(--text-color-secondary, #666);
 }
+
 [data-theme="dark"] .feature-item p {
     --text-color-secondary: #909dab;
 }
 
 
-/* CTA Section */
 .landing-cta {
-    background-color: var(--primary-accent-color, #563d7c); /* Пример акцентного цвета */
+    background-color: var(--primary-accent-color, #563d7c);
     color: #ffffff;
     padding: 60px 0;
     text-align: center;
 }
+
 [data-theme="dark"] .landing-cta {
-    --primary-accent-color: #377ef0; /* Акцентный цвет для темной темы */
+    --primary-accent-color: #377ef0;
 }
 
 
@@ -157,29 +165,26 @@
     margin-right: auto;
 }
 
-/* Добавление CSS переменных (если еще нету или нужно специфичное) */
 :root {
-    /* ... существующие ... */
     --hero-bg-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --hero-text-color: #ffffff;
-    --button-secondary-bg: rgba(255,255,255,0.2);
+    --button-secondary-bg: rgba(255, 255, 255, 0.2);
     --button-secondary-text: #fff;
     --button-secondary-border: #fff;
-    --button-secondary-hover-bg: rgba(255,255,255,0.3);
+    --button-secondary-hover-bg: rgba(255, 255, 255, 0.3);
     --section-bg-light: #ffffff;
     --text-color-secondary: #666;
     --primary-accent-color: #563d7c;
 }
 
 [data-theme="dark"] {
-    /* ... существующие ... */
     --hero-bg-color: linear-gradient(135deg, #373b44 0%, #232526 100%);
     --hero-text-color: #e0e0e0;
-    --button-secondary-bg: rgba(108,117,125,0.25); /* Темный вторичный */
+    --button-secondary-bg: rgba(108, 117, 125, 0.25);
     --button-secondary-text: #ced4da;
     --button-secondary-border: #6c757d;
-    --button-secondary-hover-bg: rgba(108,117,125,0.35);
+    --button-secondary-hover-bg: rgba(108, 117, 125, 0.35);
     --section-bg-light: var(--card-bg-color);
     --text-color-secondary: #909dab;
-    --primary-accent-color: var(--button-primary-bg); /* Используем тот же, что и для основной кнопки */
+    --primary-accent-color: var(--button-primary-bg);
 }

@@ -40,7 +40,7 @@ class GenshinPityTracker:
         return UserDrop.query.filter(
             UserDrop.user_id == self.user.id,
             UserDrop.game_id == self.game.id
-        ).order_by(UserDrop.timestamp.asc()).all()  # ASC для корректной итерации при расчете pity
+        ).order_by(UserDrop.timestamp.asc()).all()
 
     def _get_banner_group_for_drop(self, drop):
         """Определяет banner_group для конкретного дропа."""

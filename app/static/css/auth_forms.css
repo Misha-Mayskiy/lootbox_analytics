@@ -2,7 +2,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 80vh; /* Чтобы форма была по центру экрана */
+    min-height: 80vh;
     padding: 20px;
 }
 
@@ -12,12 +12,12 @@
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 450px; /* Максимальная ширина формы */
+    max-width: 450px;
     border: 1px solid var(--border-color);
 }
 
 [data-theme="dark"] .auth-form-wrapper {
-    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3); /* Более заметная тень для темной темы */
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
 }
 
 
@@ -50,7 +50,7 @@
     padding: 12px 15px;
     border: 1px solid var(--input-border-color, #ced4da);
     border-radius: 4px;
-    box-sizing: border-box; /* Чтобы padding не увеличивал ширину */
+    box-sizing: border-box;
     background-color: var(--input-bg-color, #fff);
     color: var(--input-text-color, #495057);
     transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
@@ -76,7 +76,7 @@
 
 
 .auth-form .form-control.is-invalid {
-    border-color: #dc3545; /* Цвет ошибки Bootstrap */
+    border-color: #dc3545;
 }
 
 [data-theme="dark"] .auth-form .form-control.is-invalid {
@@ -84,11 +84,11 @@
 }
 
 .auth-form .invalid-feedback {
-    display: block; /* Чтобы всегда было место под ошибку */
+    display: block;
     width: 100%;
     margin-top: .25rem;
     font-size: .875em;
-    color: #dc3545; /* Цвет ошибки Bootstrap */
+    color: #dc3545;
 }
 
 [data-theme="dark"] .auth-form .invalid-feedback {
@@ -103,11 +103,11 @@
 
 .auth-form .form-check-input {
     margin-right: 8px;
-    margin-top: 0; /* Убрать дефолтный отступ */
+    margin-top: 0;
 }
 
 .auth-form .form-check-label {
-    margin-bottom: 0; /* Убрать дефолтный отступ */
+    margin-bottom: 0;
 }
 
 .auth-form .btn-block {
@@ -136,7 +136,7 @@
 .auth-options .btn-steam {
     background-color: #1b2838; /* Steam цвет */
     color: white;
-    display: flex; /* Для иконки и текста */
+    display: flex;
     align-items: center;
     justify-content: center;
 }
@@ -167,9 +167,7 @@
     margin-bottom: 15px;
 }
 
-/* Добавление CSS переменных для инпутов */
 :root {
-    /* ... существующие ... */
     --input-border-color: #ced4da;
     --input-bg-color: #fff;
     --input-text-color: #495057;
@@ -178,7 +176,6 @@
 }
 
 [data-theme="dark"] {
-    /* ... существующие ... */
     --input-border-color: #545d68;
     --input-bg-color: #373e47;
     --input-text-color: #e0e0e0;
