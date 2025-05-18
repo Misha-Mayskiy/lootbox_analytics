@@ -77,7 +77,7 @@
         ```
     **Примечание:**
     * `SECRET_KEY` должен быть действительно случайным и длинным.
-    * `STEAM_API_KEY` создайте через ваш аккаунт по ссылке: https://steamcommunity.com/dev/apikey
+    * `STEAM_API_KEY` создайте через ваш api_key по ссылке: https://steamcommunity.com/dev/apikey
 
 5.  **Примените миграции базы данных:**
     ```bash

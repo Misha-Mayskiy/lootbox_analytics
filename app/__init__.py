@@ -3,14 +3,14 @@ from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
-from authlib.integrations.flask_client import OAuth
+from flask_openid import OpenID
 import os
 
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
-oauth = OAuth()
+oid = OpenID()
 
 
 def create_app(config_class=Config):
@@ -37,15 +37,10 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
-    oauth.init_app(app)
+    oid.init_app(app)
 
-    oauth.register(
-        name='steam',
-        server_metadata_url='https://steamcommunity.com/openid/.well-known/openid-configuration',
-        client_kwargs={
-            'scope': 'openid profile email',
-        }
-    )
+    if not os.path.exists(app.config.get('OPENID_FS_STORE_PATH', os.path.join(app.instance_path, 'openid_store'))):
+        os.makedirs(app.config.get('OPENID_FS_STORE_PATH', os.path.join(app.instance_path, 'openid_store')))
 
     from app.routes.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')

@@ -1,7 +1,7 @@
 import secrets
 from flask import render_template, redirect, url_for, flash, request, Blueprint, current_app, session
 from flask_login import login_user, logout_user, current_user, login_required
-from app import db, oauth
+from app import db, oid
 from app.forms import LoginForm, RegistrationForm
 from app.models import User
 from urllib.parse import urlparse, urljoin
@@ -20,7 +20,7 @@ def is_safe_url(target):
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.dashboard'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -47,7 +47,7 @@ def logout():
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.dashboard'))
     form = RegistrationForm()
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)
@@ -62,42 +62,24 @@ def register():
 
 
 @bp.route('/steam/login')
-def steam_authorize():
+@oid.loginhandler
+def steam_login():
     if current_user.is_authenticated:
+        next_url = request.args.get('next')
+        if next_url:
+            session['next_url_after_steam_login'] = next_url
         return redirect(url_for('main.dashboard'))
 
-    redirect_uri = url_for('auth.steam_callback', _external=True,
-                           _scheme='https')
-
-    return oauth.steam.authorize_redirect(redirect_uri)
+    return oid.try_login('https://steamcommunity.com/openid/id/',
+                         ask_for=['email', 'nickname'])
 
 
-@bp.route('/steam/callback')
-def steam_callback():
-    try:
-        token = oauth.steam.authorize_access_token()
-    except Exception as e:
-        current_app.logger.error(f"Steam OAuth callback error: {e}")
-        flash(f'Ошибка аутентификации через Steam: {e}', 'danger')
-        return redirect(url_for('auth.login'))
-
-    if not token:
-        flash('Не удалось получить токен от Steam.', 'danger')
-        return redirect(url_for('auth.login'))
-
-    userinfo = token.get('userinfo')
-
-    if not userinfo:
-        id_token_claims = oauth.steam.parse_id_token(token)
-        if not id_token_claims:
-            flash('Не удалось получить информацию о пользователе из Steam токена.', 'danger')
-            return redirect(url_for('auth.login'))
-        userinfo = id_token_claims  # Используем все клеймы из id_token
-
-    steam_identity_url = userinfo.get('sub')
+@oid.after_login
+def steam_after_login_callback(resp):
+    steam_identity_url = resp.identity_url
     if not steam_identity_url or not steam_identity_url.startswith('https://steamcommunity.com/openid/id/'):
         flash('Не удалось извлечь корректный Steam ID из ответа Steam.', 'danger')
-        current_app.logger.error(f"Invalid 'sub' in Steam userinfo: {steam_identity_url}")
+        current_app.logger.error(f"Invalid Steam identity_url: {steam_identity_url}")
         return redirect(url_for('auth.login'))
 
     steam_id = steam_identity_url.split('/')[-1]
@@ -105,12 +87,19 @@ def steam_callback():
     user = User.query.filter_by(steam_id=steam_id).first()
     if user is None:
         username_candidate = f"steam_{steam_id}"
+        count = 1
+        while User.query.filter_by(username=username_candidate).first():
+            username_candidate = f"steam_{steam_id}_{count}"
+            count += 1
 
         user = User(
             steam_id=steam_id,
             username=username_candidate,
             email=f"{steam_id}@steam.local"
         )
+
+        if User.query.filter_by(email=user.email).first() and user.email is not None:
+            pass
 
         import secrets
         user.api_key = secrets.token_hex(32)
@@ -120,7 +109,7 @@ def steam_callback():
             flash('Вы успешно вошли через Steam и для вас создан новый аккаунт!', 'success')
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Ошибка создания Steam пользователя (Authlib): {e}")
+            current_app.logger.error(f"Ошибка создания Steam пользователя (Flask-OpenID): {e}")
             flash(f'Ошибка при создании пользователя Steam: {e}', 'danger')
             return redirect(url_for('auth.login'))
     else:
