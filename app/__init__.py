@@ -1,4 +1,6 @@
 from flask import Flask
+from flask_wtf import CSRFProtect
+
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -11,15 +13,22 @@ migrate = Migrate()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 oid = OpenID()
+csrf = CSRFProtect()
 
 
 def create_app(config_class=Config):
     app = Flask(__name__)
+    csrf.init_app(app)
 
     if not app.debug and not app.testing:
         import logging
-        from logging.handlers import RotatingFileHandler
-        file_handler = RotatingFileHandler('logs/lootbox_analytics.log', maxBytes=10240, backupCount=10)
+        from logging import FileHandler
+
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+
+        file_handler = FileHandler('logs/lootbox_analytics.log')
+
         file_handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
         file_handler.setLevel(logging.INFO)
@@ -50,6 +59,9 @@ def create_app(config_class=Config):
 
     from app.routes.import_data import bp as import_data_api_bp
     app.register_blueprint(import_data_api_bp, url_prefix='/import')
+
+    from app.routes.cs2_api import bp_cs2_api
+    app.register_blueprint(bp_cs2_api)
 
     if not os.path.exists(app.config['OPENID_FS_STORE_PATH']):
         os.makedirs(app.config['OPENID_FS_STORE_PATH'])

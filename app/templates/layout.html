@@ -39,6 +39,7 @@
         <div class="nav-user-actions">
             {% if current_user.is_authenticated %}
             <span class="nav-username">Привет, {{ current_user.username }}!</span>
+            <a href="{{ url_for('auth.user_profile') }}">Профиль</a>
             <a href="{{ url_for('auth.logout') }}">Выйти</a>
             {% else %}
             <a href="{{ url_for('auth.login') }}">Войти</a>

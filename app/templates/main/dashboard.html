@@ -29,16 +29,16 @@
             </div>
         </div>
         <div class="row mt-3">
-            <div class="col-md-6 col-lg-4 mb-3"> {# col-lg-4 для 3 карточек в ряд на больших экранах #}
-                <div class="card game-card-placeholder">
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card"> {# Убрал game-card-placeholder, если он только для заглушек #}
                     <div class="card-body">
                         <h5 class="card-title">
-                            <img src="{{ url_for('static', filename='img/game_icons/counter-strike.svg') }}"
-                                 alt="CS2" class="game-icon-card">
+                            <img src="{{ url_for('static', filename='img/game_icons/counter-strike.svg') }}" alt="CS2"
+                                 class="game-icon-card">
                             Counter-Strike 2
                         </h5>
-                        <p class="card-text text-muted">Анализ стоимости инвентаря и ROI от открытия кейсов.</p>
-                        <a href="#" class="btn btn-outline-secondary disabled" aria-disabled="true">В разработке</a>
+                        <p class="card-text">Анализ текущего инвентаря и расчет ROI.</p> {# Обновил описание #}
+                        <a href="{{ url_for('main.cs2_stats_page') }}" class="btn btn-primary">Статистика CS2</a>
                     </div>
                 </div>
             </div>

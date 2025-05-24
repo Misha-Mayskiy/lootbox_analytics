@@ -16,9 +16,10 @@ class User(UserMixin, db.Model):
     steam_id = db.Column(db.String(64), unique=True, nullable=True, index=True)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     api_key = db.Column(db.String(128), unique=True, nullable=True, index=True)
+    cs2_investment_amount = db.Column(db.Float, nullable=True, default=0.0)
 
-    drops = db.relationship('UserDrop', backref='user',
-                            lazy='dynamic')
+    drops = db.relationship('UserDrop', backref='user', lazy='dynamic')
+    cs2_inventory_items = db.relationship('UserCS2InventoryItem', backref='user', lazy='dynamic')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -107,6 +108,8 @@ class UserCS2InventoryItem(db.Model):
 
     item_type_str = db.Column(db.String(100))  # "Rifle", "Knife", "Sticker" (из тегов)
     rarity_str = db.Column(db.String(100))  # "Covert", "Mil-Spec" (из тегов)
+    rarity_internal_name = db.Column(db.String(100), nullable=True, index=True)  # internal_name
+    rarity_color_hex = db.Column(db.String(7), nullable=True)  # HEX цвет из тега (e.g., "eb4b4b")
     exterior_str = db.Column(db.String(100))  # "Factory New", "Field-Tested" (из тегов)
 
     icon_url = db.Column(db.String(512))

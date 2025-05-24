@@ -5,6 +5,9 @@ from urllib.parse import urlparse, urljoin, urlunparse, urlencode
 import requests
 from flask import render_template, redirect, url_for, flash, request, Blueprint, current_app, session
 from flask_login import login_user, logout_user, current_user, login_required
+from flask_wtf import FlaskForm
+from wtforms import PasswordField, SubmitField
+from wtforms.validators import Length, DataRequired, EqualTo
 
 from app import db
 from app.forms import LoginForm, RegistrationForm
@@ -209,3 +212,39 @@ def steam_callback():
     if not is_safe_url(next_url):
         next_url = url_for('main.dashboard')
     return redirect(next_url)
+
+
+@bp.route('/profile', methods=['GET', 'POST'])
+@login_required
+def user_profile():
+    # Здесь можно будет добавить формы для изменения username, email, password
+    # Для смены пароля:
+    form_change_password = ChangePasswordForm()
+    if form_change_password.validate_on_submit() and request.method == 'POST' and 'change_password_submit' in request.form:
+        if current_user.check_password(form_change_password.current_password.data):
+            current_user.set_password(form_change_password.new_password.data)
+            db.session.commit()
+            flash('Пароль успешно изменен.', 'success')
+            return redirect(url_for('main.user_profile'))
+        else:
+            flash('Неверный текущий пароль.', 'danger')
+
+    # TODO: Добавить формы и логику для смены username и email (с учетом уникальности и верификации)
+
+    return render_template('main/user_profile.html',
+                           title="Профиль пользователя")
+    # user=current_user не нужен, current_user доступен в шаблонах
+    # form_change_password=form_change_password)
+
+
+class ChangePasswordForm(FlaskForm):
+    current_password = PasswordField('Текущий пароль', validators=[DataRequired()])
+    new_password = PasswordField('Новый пароль', validators=[
+        DataRequired(),
+        Length(min=6, message='Пароль должен быть не менее 6 символов')
+    ])
+    confirm_new_password = PasswordField('Повторите новый пароль', validators=[
+        DataRequired(),
+        EqualTo('new_password', message='Пароли должны совпадать')
+    ])
+    submit = SubmitField('Сменить пароль')

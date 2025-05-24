@@ -1,0 +1,164 @@
+{% extends "layout.html" %}
+
+{% block head_extra %}
+{# Можно добавить специфичный CSS для этой страницы, если потребуется #}
+{#
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cs2_stats.css') }}"> #}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <input type="hidden" id="csrf_token_cs2_page" value="{{ csrf_token() }}">
+    <h2>Статистика CS2 для {{ current_user.username }}</h2>
+
+    <button id="syncCs2InventoryBtn" class="btn btn-success mb-3">Синхронизировать инвентарь Steam</button>
+    <div id="syncStatus" class="alert" style="display: none;"></div>
+
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <h4>Обзор инвентаря (текущий)</h4>
+            <p>Общая стоимость: <strong>{{ total_inventory_value }} {{ currency }}</strong></p>
+            <p>Ваши затраты (введите вручную):
+                <input type="number" id="cs2InvestmentInput" value="{{ user_cs2_investment }}" step="0.01"
+                       class="form-control-sm" style="width: 100px;">
+                <button id="saveInvestmentBtn" class="btn btn-sm btn-outline-primary ml-1">Сохранить</button>
+            </p>
+            <p>ROI (на основе текущего инвентаря и затрат): <strong>{{ roi }}%</strong></p>
+        </div>
+        <div class="col-md-3">
+            <h4>Редкость предметов</h4>
+            {% if rarity_chart_data.labels %}
+            <canvas id="cs2RarityPieChart" style="max-height: 200px;"></canvas>
+            {% else %}
+            <p class="text-muted">Нет данных для графика редкости.</p>
+            {% endif %}
+        </div>
+        <div class="col-md-3">
+            <h4>Типы предметов</h4>
+            {% if type_chart_data.labels %}
+            <canvas id="cs2TypePieChart" style="max-height: 200px;"></canvas>
+            {% else %}
+            <p class="text-muted">Нет данных для графика типов.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <h4 class="mt-4">Предметы в инвентаре ({{ inventory_items|length }})</h4>
+    {% if inventory_items %}
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <tr>
+                <th>Иконка</th>
+                <th>Название</th>
+                <th>Редкость</th>
+                <th>Тип</th>
+                <th>Износ</th>
+                <th>Цена ({{ currency }})</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in inventory_items %}
+            <tr>
+                <td><img src="{{ item.icon_url }}" alt="{{ item.name }}"
+                         style="width: 64px; height: auto; background-color: #555;" onerror="this.style.display='none'">
+                </td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.rarity_str }}</td>
+                <td>{{ item.item_type_str }}</td>
+                <td>{{ item.exterior_str }}</td>
+                <td>{{ "%.2f"|format(item.current_market_price) if item.current_market_price is not none else 'N/A' }}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>Ваш CS2 инвентарь пуст или еще не синхронизирован.</p>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const syncBtn = document.getElementById('syncCs2InventoryBtn');
+        const syncStatusDiv = document.getElementById('syncStatus');
+        const investmentInput = document.getElementById('cs2InvestmentInput');
+        const saveInvestmentBtn = document.getElementById('saveInvestmentBtn');
+        const csrfToken = document.getElementById('csrf_token_cs2_page').value;
+
+        if (syncBtn) {
+            syncBtn.addEventListener('click', function () {
+                syncStatusDiv.style.display = 'block';
+                syncStatusDiv.className = 'alert alert-info';
+                syncStatusDiv.innerText = 'Синхронизация инвентаря CS2... Пожалуйста, подождите.';
+                syncBtn.disabled = true;
+
+                fetch("{{ url_for('cs2_api.sync_cs2_inventory') }}", { // Используем имя блюпринта cs2_api
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    }
+                })
+                    .then(response => response.json().then(data => ({status: response.status, body: data})))
+                    .then(dataObj => {
+                        syncStatusDiv.className = dataObj.status === 200 ? 'alert alert-success' : 'alert alert-danger';
+                        syncStatusDiv.innerText = dataObj.body.message || 'Статус неизвестен';
+                        if (dataObj.status === 200) {
+                            // Можно добавить таймер и перезагрузить страницу для обновления данных
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 2000);
+                        }
+                    })
+                    .catch(error => {
+                        syncStatusDiv.className = 'alert alert-danger';
+                        syncStatusDiv.innerText = 'Ошибка синхронизации: ' + error.message;
+                        console.error('Ошибка синхронизации CS2:', error);
+                    })
+                    .finally(() => {
+                        syncBtn.disabled = false;
+                    });
+            });
+        }
+
+        if (saveInvestmentBtn && investmentInput) {
+            saveInvestmentBtn.addEventListener('click', function () {
+                const amount = parseFloat(investmentInput.value);
+                // TODO: Отправить AJAX запрос на бэкенд для сохранения этой суммы
+                // Например, POST /api/v1/user/update-cs2-investment {'amount': amount}
+                // И обновить страницу или ROI на лету
+                alert('Функция сохранения затрат в разработке. Сумма: ' + amount);
+            });
+        }
+
+        // График редкости CS2
+        const cs2RarityCtx = document.getElementById('cs2RarityPieChart');
+        const cs2RarityData = JSON.parse('{{ rarity_chart_data | tojson | safe }}');
+        if (cs2RarityCtx && cs2RarityData.labels && cs2RarityData.labels.length > 0) {
+            new Chart(cs2RarityCtx, {
+                type: 'doughnut',
+                data: cs2RarityData,
+                options: {responsive: true, maintainAspectRatio: false, plugins: {legend: {position: 'right'}}}
+            });
+        } else if (cs2RarityCtx) {
+            cs2RarityCtx.style.display = 'none';
+        }
+
+        // График типов CS2
+        const cs2TypeCtx = document.getElementById('cs2TypePieChart');
+        const cs2TypeData = JSON.parse('{{ type_chart_data | tojson | safe }}');
+        if (cs2TypeCtx && cs2TypeData.labels && cs2TypeData.labels.length > 0) {
+            new Chart(cs2TypeCtx, {
+                type: 'pie',
+                data: cs2TypeData,
+                options: {responsive: true, maintainAspectRatio: false, plugins: {legend: {position: 'right'}}}
+            });
+        } else if (cs2TypeCtx) {
+            cs2TypeCtx.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}
