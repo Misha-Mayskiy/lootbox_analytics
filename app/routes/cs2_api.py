@@ -11,7 +11,7 @@ bp_cs2_api = Blueprint('cs2_api', __name__, url_prefix='/api/v1/cs2')
 
 STEAM_INVENTORY_URL_TEMPLATE = "https://steamcommunity.com/inventory/{steam_id}/730/2?l=english&count=5000"
 STEAM_PRICE_URL_TEMPLATE = "https://steamcommunity.com/market/priceoverview/"
-PRICE_CACHE_TTL_SECONDS = 3 * 60 * 60  # 3 часа
+PRICE_CACHE_TTL_SECONDS = 3 * 60 * 60
 
 
 def _get_item_price_from_steam_market(market_hash_name, currency_code=1):  # 1 - USD, 5 - RUB
@@ -82,16 +82,26 @@ def sync_cs2_inventory():
     if not current_user.steam_id:
         return jsonify(message="Steam аккаунт не подключен к вашему профилю."), 400
 
+    try:
+        validated_steam_id = str(int(current_user.steam_id))
+    except ValueError:
+        current_app.logger.error(f"Некорректный SteamID для пользователя {current_user.id}: {current_user.steam_id}")
+        return jsonify(message="Некорректный формат SteamID."), 400
+
     cs2_game = Game.query.filter_by(slug='cs2').first()
     if not cs2_game:
         current_app.logger.error("Игра CS2 не найдена в БД при попытке синхронизации инвентаря.")
         return jsonify(message="Игра CS2 не настроена в системе."), 500
 
-    inventory_url = STEAM_INVENTORY_URL_TEMPLATE.format(steam_id=current_user.steam_id)
+    inventory_url = f"https://steamcommunity.com/inventory/{validated_steam_id}/730/2"
+    inventory_params = {
+        'l': 'english',
+        'count': 5000
+    }
     inventory_response_obj = None
 
     try:
-        inventory_response_obj = requests.get(inventory_url, timeout=20)
+        inventory_response_obj = requests.get(inventory_url, params=inventory_params, timeout=20)
         inventory_response_obj.raise_for_status()
         inventory_data_json = inventory_response_obj.json()
     except requests.exceptions.Timeout:
