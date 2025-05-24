@@ -1,12 +1,14 @@
 import re
 import secrets
+from urllib.parse import urlparse, urljoin, urlunparse, urlencode
+
 import requests
 from flask import render_template, redirect, url_for, flash, request, Blueprint, current_app, session
 from flask_login import login_user, logout_user, current_user, login_required
-from app import db, oid
+
+from app import db
 from app.forms import LoginForm, RegistrationForm
 from app.models import User
-from urllib.parse import urlparse, urljoin, urlunparse, urlencode
 
 bp = Blueprint('auth', __name__,
                template_folder='../../templates/auth')
@@ -62,68 +64,6 @@ def register():
         login_user(user)
         return redirect(url_for('main.dashboard'))
     return render_template('auth/register.html', title='Регистрация', form=form)
-
-
-# @bp.route('/steam/login')
-# @oid.loginhandler
-# def steam_login():
-#     if current_user.is_authenticated:
-#         next_url = request.args.get('next')
-#         if next_url:
-#             session['next_url_after_steam_login'] = next_url
-#         return redirect(url_for('main.dashboard'))
-#
-#     return oid.try_login('https://steamcommunity.com/openid/id/',
-#                          ask_for=['email', 'nickname'])
-#
-#
-# @oid.after_login
-# def steam_after_login_callback(resp):
-#     steam_identity_url = resp.identity_url
-#     if not steam_identity_url or not steam_identity_url.startswith('https://steamcommunity.com/openid/id/'):
-#         flash('Не удалось извлечь корректный Steam ID из ответа Steam.', 'danger')
-#         current_app.logger.error(f"Invalid Steam identity_url: {steam_identity_url}")
-#         return redirect(url_for('auth.login'))
-#
-#     steam_id = steam_identity_url.split('/')[-1]
-#
-#     user = User.query.filter_by(steam_id=steam_id).first()
-#     if user is None:
-#         username_candidate = f"steam_{steam_id}"
-#         count = 1
-#         while User.query.filter_by(username=username_candidate).first():
-#             username_candidate = f"steam_{steam_id}_{count}"
-#             count += 1
-#
-#         user = User(
-#             steam_id=steam_id,
-#             username=username_candidate,
-#             email=f"{steam_id}@steam.local"
-#         )
-#
-#         if User.query.filter_by(email=user.email).first() and user.email is not None:
-#             pass
-#
-#         import secrets
-#         user.api_key = secrets.token_hex(32)
-#         db.session.add(user)
-#         try:
-#             db.session.commit()
-#             flash('Вы успешно вошли через Steam и для вас создан новый аккаунт!', 'success')
-#         except Exception as e:
-#             db.session.rollback()
-#             current_app.logger.error(f"Ошибка создания Steam пользователя (Flask-OpenID): {e}")
-#             flash(f'Ошибка при создании пользователя Steam: {e}', 'danger')
-#             return redirect(url_for('auth.login'))
-#     else:
-#         flash(f'С возвращением, {user.username}! Вы вошли через Steam.', 'success')
-#
-#     login_user(user)
-#
-#     next_url = session.pop('next_url_after_steam_login', None) or url_for('main.dashboard')
-#     if not is_safe_url(next_url):
-#         next_url = url_for('main.dashboard')
-#     return redirect(next_url)
 
 
 def validate_steam_response(args):

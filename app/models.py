@@ -89,3 +89,50 @@ class UserDrop(db.Model):
 
     def __repr__(self):
         return f'<UserDrop ID: {self.id} Item: {self.item_name} User: {self.user.username}>'
+
+
+class UserCS2InventoryItem(db.Model):
+    __tablename__ = 'user_cs2_inventory_items'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    game_id = db.Column(db.Integer, db.ForeignKey('games.id'), nullable=False)  # Будет ID игры CS2
+
+    asset_id = db.Column(db.String(255), nullable=False,
+                         index=True)  # Steam asset_id, уникален для предмета в инвентаре
+    class_id = db.Column(db.String(255), nullable=False, index=True)
+    instance_id = db.Column(db.String(255), nullable=False, index=True)
+
+    name = db.Column(db.String(255), nullable=False)  # "AK-47 | Redline"
+    market_hash_name = db.Column(db.String(255), nullable=False, index=True)  # Для запроса цены
+
+    item_type_str = db.Column(db.String(100))  # "Rifle", "Knife", "Sticker" (из тегов)
+    rarity_str = db.Column(db.String(100))  # "Covert", "Mil-Spec" (из тегов)
+    exterior_str = db.Column(db.String(100))  # "Factory New", "Field-Tested" (из тегов)
+
+    icon_url = db.Column(db.String(512))
+
+    current_market_price = db.Column(db.Float, nullable=True)  # Цена в USD или выбранной валюте
+    price_currency = db.Column(db.String(10), nullable=True)  # e.g., "USD", "RUB"
+    last_price_update = db.Column(db.DateTime, nullable=True)
+
+    tradable = db.Column(db.Boolean, default=True)
+    marketable = db.Column(db.Boolean, default=True)
+
+    snapshot_time = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    __table_args__ = (db.UniqueConstraint('user_id', 'game_id', 'asset_id', name='uq_user_game_cs2_asset'),)
+
+    def __repr__(self):
+        return f'<UserCS2InventoryItem {self.name} (User: {self.user_id})>'
+
+
+class PriceCacheCS2(db.Model):
+    __tablename__ = 'price_cache_cs2'
+    market_hash_name = db.Column(db.String(255), primary_key=True)
+    price = db.Column(db.Float)
+    currency = db.Column(db.String(10))  # e.g., 'USD', 'RUB' (Steam Market API возвращает код валюты)
+    volume = db.Column(db.Integer, nullable=True)  # Количество продаж за 24 часа (если API отдает)
+    last_fetched_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    def __repr__(self):
+        return f'<PriceCacheCS2 {self.market_hash_name}: {self.price} {self.currency}>'
