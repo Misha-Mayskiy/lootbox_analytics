@@ -10,7 +10,7 @@ from wtforms import PasswordField, SubmitField
 from wtforms.validators import Length, DataRequired, EqualTo
 
 from app import db
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, EditUsernameForm, ChangePasswordForm
 from app.models import User
 
 bp = Blueprint('auth', __name__,
@@ -217,34 +217,50 @@ def steam_callback():
 @bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 def user_profile():
-    # Здесь можно будет добавить формы для изменения username, email, password
-    # Для смены пароля:
-    form_change_password = ChangePasswordForm()
-    if form_change_password.validate_on_submit() and request.method == 'POST' and 'change_password_submit' in request.form:
-        if current_user.check_password(form_change_password.current_password.data):
-            current_user.set_password(form_change_password.new_password.data)
-            db.session.commit()
-            flash('Пароль успешно изменен.', 'success')
-            return redirect(url_for('main.user_profile'))
-        else:
-            flash('Неверный текущий пароль.', 'danger')
+    form_edit_username = EditUsernameForm(current_user.username, prefix="edit_username")  # Добавляем префикс
+    form_change_password = ChangePasswordForm(prefix="change_password")  # Добавляем префикс
 
-    # TODO: Добавить формы и логику для смены username и email (с учетом уникальности и верификации)
+    if request.method == 'POST':
+        if 'submit_username' in request.form and form_edit_username.validate_on_submit():
+            old_username = current_user.username
+            current_user.username = form_edit_username.username.data
+            try:
+                db.session.commit()
+                flash(f'Имя пользователя успешно изменено с "{old_username}" на "{current_user.username}".', 'success')
+                return redirect(url_for('main.user_profile'))
+            except Exception as e:
+                db.session.rollback()
+                current_app.logger.error(f"Ошибка смены username для user {current_user.id}: {e}")
+                flash('Произошла ошибка при смене имени пользователя. Возможно, такое имя уже занято.', 'danger')
+
+        elif 'submit_password' in request.form and form_change_password.validate_on_submit():
+            if current_user.password_hash and current_user.check_password(
+                    form_change_password.current_password.data):  # Проверка, что пароль вообще был установлен
+                current_user.set_password(form_change_password.new_password.data)
+                db.session.commit()
+                flash('Пароль успешно изменен.', 'success')
+                return redirect(url_for('main.user_profile'))
+            elif not current_user.password_hash:  # Если пользователь регался через Steam, у него нет пароля
+                flash('Вы вошли через Steam, установка пароля через эту форму невозможна.', 'warning')
+            else:
+                flash('Неверный текущий пароль.', 'danger')
+                # Чтобы ошибки отобразились в форме, ее нужно передать снова
+                return render_template('main/user_profile.html',
+                                       title="Профиль пользователя",
+                                       form_edit_username=form_edit_username,
+                                       form_change_password=form_change_password,  # Передаем форму с ошибками
+                                       active_form='password')  # Для JS, чтобы раскрыть нужную <details>
+
+    # Для GET запроса или если POST не прошел валидацию для username
+    if form_edit_username.errors and 'submit_username' in request.form:
+        active_form = 'username'
+    elif form_change_password.errors and 'submit_password' in request.form:  # уже обработано выше с return
+        active_form = 'password'
+    else:
+        active_form = None
 
     return render_template('main/user_profile.html',
-                           title="Профиль пользователя")
-    # user=current_user не нужен, current_user доступен в шаблонах
-    # form_change_password=form_change_password)
-
-
-class ChangePasswordForm(FlaskForm):
-    current_password = PasswordField('Текущий пароль', validators=[DataRequired()])
-    new_password = PasswordField('Новый пароль', validators=[
-        DataRequired(),
-        Length(min=6, message='Пароль должен быть не менее 6 символов')
-    ])
-    confirm_new_password = PasswordField('Повторите новый пароль', validators=[
-        DataRequired(),
-        EqualTo('new_password', message='Пароли должны совпадать')
-    ])
-    submit = SubmitField('Сменить пароль')
+                           title="Профиль пользователя",
+                           form_edit_username=form_edit_username,
+                           form_change_password=form_change_password,
+                           active_form=active_form)

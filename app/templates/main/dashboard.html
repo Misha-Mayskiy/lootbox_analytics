@@ -1,74 +1,155 @@
 {% extends "layout.html" %}
 
-{% block content %}
-<div class="container mt-4">
-    <h2>Дашборд пользователя: {{ current_user.username }}</h2>
-    <p>Добро пожаловать в ваш личный кабинет!</p>
+{% block head_extra %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
 
-    {% if current_user.api_key %}
-    <div class="alert alert-api-key">
-        Ваш API Key: <code>{{ current_user.api_key }}</code>
+{% block content %}
+<div class="container dashboard-container py-4"> {# py-4 - Bootstrap-like padding top/bottom #}
+    <div class="dashboard-header mb-4">
+        <h1 class="display-5 mb-1">Добро пожаловать, {{ current_user.username }}!</h1>
+        <p class="lead text-muted mb-0">Ваш персональный центр анализа игровой статистики.</p>
+    </div>
+
+    <h3 class="mb-3 section-title">Поддерживаемые игры:</h3>
+    <div class="row">
+        {# Карточка Genshin Impact #}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card game-card h-100 shadow-sm"> {# h-100 для одинаковой высоты карточек в ряду Bootstrap #}
+                <div class="game-card-banner genshin-banner">
+                    {# Можно добавить фоновое изображение для баннера игры #}
+                    <img src="{{ url_for('static', filename='img/game_icons/genshin-impact.svg') }}"
+                         alt="Genshin Impact" class="game-card-icon">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title game-title">Genshin Impact</h5>
+                    <p class="card-text text-muted small flex-grow-1">Анализируйте историю ваших молитв, отслеживайте
+                        Pity, 50/50 гаранты и оценивайте свою удачу.</p>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('main.genshin_stats_page') }}" class="btn btn-primary btn-sm game-card-btn">Статистика</a>
+                        <a href="{{ url_for('main.genshin_import_url_page') }}"
+                           class="btn btn-outline-accent btn-sm game-card-btn mt-2">Импорт данных</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Карточка CS2 #}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card game-card h-100 shadow-sm">
+                <div class="game-card-banner cs2-banner">
+                    <img src="{{ url_for('static', filename='img/game_icons/counter-strike.svg') }}" alt="CS2"
+                         class="game-card-icon">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title game-title">Counter-Strike 2</h5>
+                    <p class="card-text text-muted small flex-grow-1">Просматривайте текущий инвентарь, анализируйте его
+                        стоимость и рассчитывайте ROI от открытия кейсов.</p>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('main.cs2_stats_page') }}" class="btn btn-primary btn-sm game-card-btn">Статистика</a>
+                        {# Кнопка импорта истории (с расширением) будет здесь позже #}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Карточка-заглушка Honkai: Star Rail #}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card game-card game-card-placeholder h-100 shadow-sm">
+                <div class="game-card-banner hsr-banner">
+                    <img src="{{ url_for('static', filename='img/game_icons/honkai-star-rail.svg') }}"
+                         alt="Honkai: Star Rail" class="game-card-icon placeholder-icon">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title game-title">Honkai: Star Rail</h5>
+                    <p class="card-text text-muted small flex-grow-1">Отслеживание Прыжков, pity-системы и анализ
+                        удачи.</p>
+                    <div class="mt-auto">
+                        <span class="badge badge-info">Скоро</span>
+                        <button class="btn btn-outline-secondary btn-sm game-card-btn disabled mt-2"
+                                aria-disabled="true">В разработке
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Карточка-заглушка Hearthstone #}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card game-card game-card-placeholder h-100 shadow-sm">
+                <div class="game-card-banner hs-banner">
+                    <img src="{{ url_for('static', filename='img/game_icons/hearthstone.svg') }}" alt="Hearthstone"
+                         class="game-card-icon placeholder-icon">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title game-title">Hearthstone</h5>
+                    <p class="card-text text-muted small flex-grow-1">Статистика открытия паков карт и анализ вашей
+                        коллекции.</p>
+                    <div class="mt-auto">
+                        <span class="badge badge-info">Скоро</span>
+                        <button class="btn btn-outline-secondary btn-sm game-card-btn disabled mt-2"
+                                aria-disabled="true">В разработке
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {# Добавь еще карточки-заглушки, если нужно #}
+    </div>
+
+    {% if recent_activity %}
+    <div class="recent-activity-section mt-5 mb-4">
+        <h3 class="mb-3 section-title">Недавняя активность</h3>
+        {# Добавляем класс recent-activity-list к ul #}
+        <ul class="list-group list-group-flush recent-activity-list">
+            {% for activity in recent_activity %}
+            <li class="list-group-item recent-activity-item">
+                <a href="{{ activity.link | default('#') }}" class="activity-link">
+                    <img src="{{ activity.icon }}" alt="{{ activity.game }}" class="activity-game-icon">
+                    <div class="activity-details">
+                        <span class="activity-text">{{ activity.game }}: {{ activity.text }}</span>
+                        <small class="activity-time text-muted">{{ activity.time.strftime('%d %b %Y, %H:%M') if
+                            activity.time else '' }}</small>
+                    </div>
+                    <span class="activity-arrow">→</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <div class="recent-activity-section mt-5 mb-4"> {# Оборачиваем для консистентности отступов #}
+        <h3 class="mb-3 section-title">Недавняя активность</h3>
+        <div class="card"> {# Используем карточку для сообщения "нет активности" #}
+            <div class="card-body text-center text-muted">
+                <p class="mb-0">Пока нет недавней активности для отображения.</p>
+            </div>
+        </div>
     </div>
     {% endif %}
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <img src="{{ url_for('static', filename='img/game_icons/genshin-impact.svg') }}"
-                             alt="Genshin Impact" class="game-icon-card">
-                        Genshin Impact
-                    </h5>
-                    <p class="card-text">Просмотр статистики и импорт данных для Genshin Impact.</p>
-                    <a href="{{ url_for('main.genshin_stats_page') }}" class="btn btn-primary">Перейти к статистике
-                        Genshin</a>
-                    <a href="{{ url_for('main.genshin_import_url_page') }}" class="btn btn-secondary mt-2">Импортировать
-                        новые данные Genshin</a>
-                </div>
-            </div>
-        </div>
-        <div class="row mt-3">
-            <div class="col-md-6 col-lg-4 mb-3">
-                <div class="card"> {# Убрал game-card-placeholder, если он только для заглушек #}
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <img src="{{ url_for('static', filename='img/game_icons/counter-strike.svg') }}" alt="CS2"
-                                 class="game-icon-card">
-                            Counter-Strike 2
-                        </h5>
-                        <p class="card-text">Анализ текущего инвентаря и расчет ROI.</p> {# Обновил описание #}
-                        <a href="{{ url_for('main.cs2_stats_page') }}" class="btn btn-primary">Статистика CS2</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4 mb-3">
-                <div class="card game-card-placeholder">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <img src="{{ url_for('static', filename='img/game_icons/honkai-star-rail.svg') }}"
-                                 alt="Honkai: Star Rail" class="game-icon-card">
-                            Honkai: Star Rail
-                        </h5>
-                        <p class="card-text text-muted">Отслеживание Прыжков, pity-системы и анализ удачи.</p>
-                        <a href="#" class="btn btn-outline-secondary disabled" aria-disabled="true">В разработке</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4 mb-3">
-                <div class="card game-card-placeholder">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <img src="{{ url_for('static', filename='img/game_icons/hearthstone.svg') }}"
-                                 alt="Hearthstone" class="game-icon-card">
-                            Hearthstone
-                        </h5>
-                        <p class="card-text text-muted">Статистика открытия паков карт и сбор коллекции.</p>
-                        <a href="#" class="btn btn-outline-secondary disabled" aria-disabled="true">В разработке</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
+
+<script>
+    // Маленький скрипт для выделения API-ключа при клике
+    document.addEventListener('DOMContentLoaded', function () {
+        const codeBlocks = document.querySelectorAll('code.selectable-code');
+        codeBlocks.forEach(block => {
+            block.addEventListener('click', function () {
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(this);
+                selection.removeAllRanges();
+                selection.addRange(range);
+                try {
+                    document.execCommand('copy');
+                    // Можно добавить маленькое уведомление "Скопировано!"
+                    // alert('API Key скопирован в буфер обмена!');
+                } catch (err) {
+                    console.warn('Не удалось скопировать API ключ автоматически.');
+                }
+            });
+            block.style.cursor = 'pointer';
+        });
+    });
+</script>
 {% endblock %}

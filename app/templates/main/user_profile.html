@@ -1,101 +1,165 @@
 {% extends "layout.html" %}
 
 {% block head_extra %}
-{#
-<link rel="stylesheet" href="{{ url_for('static', filename='css/profile_page.css') }}"> #}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile_page.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Профиль пользователя: {{ current_user.username }}</h2>
+<div class="container mt-4 profile-page">
+    <div class="profile-header mb-4">
+        <h1 class="display-5">Мой Профиль</h1>
+        <p class="lead text-muted">Управление вашим аккаунтом и настройками Lootbox Analytics.</p>
+    </div>
 
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card mb-3">
-                <div class="card-header">Основная информация</div>
-                <div class="card-body">
-                    <p><strong>Имя пользователя:</strong> {{ current_user.username }}</p>
-                    <p><strong>Email:</strong> {{ current_user.email }}</p>
-                    <p><strong>Дата регистрации:</strong> {{ current_user.created_at.strftime('%Y-%m-%d %H:%M') if
-                        current_user.created_at else 'N/A' }}</p>
-                </div>
+    {# Отображение flash-сообщений #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show mb-3" role="alert">
+        {{ message }}
+        <button type="button" class="close-alert" data-dismiss-alert>×</button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="profile-section">
+        <h3 class="section-title-sm">Основная информация</h3>
+        <div class="profile-info-grid">
+            <div>
+                <span class="info-label">Имя пользователя:</span>
+                <span class="info-value">{{ current_user.username }}</span>
+                {#
+                <button class="btn btn-sm btn-outline-secondary ml-2" data-toggle-modal="editUsernameModal">Изменить
+                </button>
+                #}
             </div>
-
-            <div class="card mb-3">
-                <div class="card-header">Подключение Steam</div>
-                <div class="card-body">
-                    {% if current_user.steam_id %}
-                    <p class="text-success">Ваш Steam аккаунт успешно подключен!</p>
-                    <p><strong>SteamID64:</strong> {{ current_user.steam_id }}</p>
-                    {# Можно добавить кнопку "Отключить Steam", но это сложнее и требует осторожности #}
-                    {% else %}
-                    <p>Вы еще не подключили свой Steam аккаунт. Подключите его, чтобы получить доступ к статистике CS2 и
-                        другим игровым функциям.</p>
-                    <a href="{{ url_for('auth.steam_login_manual') }}" class="btn btn-steam"> {# ИЛИ
-                        'auth.steam_login_handler' #}
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"
-                             style="vertical-align: middle; margin-right: 8px;">
-                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Steam</title>
-                                <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.454 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.663 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.253 0-2.265-1.014-2.265-2.265z"/>
-                            </svg>
-                        </svg>
-                        Подключить Steam
-                    </a>
-                    {% endif %}
-                </div>
+            <div>
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ current_user.email }}</span>
+                {#
+                <button class="btn btn-sm btn-outline-secondary ml-2" data-toggle-modal="editEmailModal">Изменить
+                </button>
+                #}
             </div>
-
-            <div class="card mb-3">
-                <div class="card-header">API Ключ</div>
-                <div class="card-body">
-                    {% if current_user.api_key %}
-                    <p>Ваш API ключ для доступа к данным (если потребуется для внешних инструментов):</p>
-                    <code>{{ current_user.api_key }}</code>
-                    {# TODO: Кнопка "Перегенерировать API-ключ" #}
-                    {% else %}
-                    <p>API ключ еще не сгенерирован.</p>
-                    {# Обычно генерируется при регистрации, но на всякий случай #}
-                    {% endif %}
-                </div>
+            <div>
+                <span class="info-label">Дата регистрации:</span>
+                <span class="info-value">{{ current_user.created_at.strftime('%d %B %Y, %H:%M') if current_user.created_at else 'N/A' }}</span>
             </div>
-
-            {# --- Секция смены пароля (требует формы) --- #}
-            {#
-            <div class="card mb-3">
-                <div class="card-header">Смена пароля</div>
-                <div class="card-body">
-                    <form method="POST" action="{{ url_for('main.user_profile') }}">
-                        {{ form_change_password.hidden_tag() }}
-                        <div class="form-group">
-                            {{ form_change_password.current_password.label(class="form-label") }}
-                            {{ form_change_password.current_password(class="form-control") }}
-                        </div>
-                        <div class="form-group">
-                            {{ form_change_password.new_password.label(class="form-label") }}
-                            {{ form_change_password.new_password(class="form-control") }}
-                        </div>
-                        <div class="form-group">
-                            {{ form_change_password.confirm_new_password.label(class="form-label") }}
-                            {{ form_change_password.confirm_new_password(class="form-control") }}
-                        </div>
-                        <button type="submit" name="change_password_submit" class="btn btn-warning">Сменить пароль
-                        </button>
-                    </form>
-                </div>
-            </div>
-            #}
-            {# --- Конец секции смены пароля --- #}
-
         </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">Настройки (в разработке)</div>
-                <div class="card-body">
-                    <p class="text-muted">Здесь будут другие настройки профиля и приложения.</p>
-                    {# Например, выбор языка, настройки уведомлений и т.д. #}
+        {# Сюда можно добавить формы для изменения username/email в модальных окнах или на отдельных страницах #}
+        {% if form_edit_username %}
+        <details class="profile-details-form mt-3">
+            <summary>Сменить имя пользователя</summary>
+            <form method="POST" action="{{ url_for('auth.user_profile') }}" class="auth-form mt-2">
+                {{ form_edit_username.hidden_tag() }}
+                <div class="form-group">
+                    {{ form_edit_username.username.label(class="form-label sr-only") }} {# Скрываем label, т.к. есть
+                    summary #}
+                    {{ form_edit_username.username(class="form-control" + (" is-invalid" if
+                    form_edit_username.username.errors else ""), placeholder="Новое имя пользователя") }}
+                    {% if form_edit_username.username.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form_edit_username.username.errors %}<span>{{ error }}</span>{% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
+                <button type="submit" name="submit_username" class="btn btn-primary btn-sm">Сохранить имя</button>
+            </form>
+        </details>
+        {% endif %}
+    </div>
+
+    <div class="profile-section">
+        <h3 class="section-title-sm">Безопасность и Доступ</h3>
+        <div class="setting-item">
+            <h4>API Ключ</h4>
+            {% if current_user.api_key %}
+            <div class="api-key-display">
+                <code class="selectable-code">{{ current_user.api_key }}</code>
+                <form method="POST" action="{{ url_for('main.regenerate_api_key') }}" class="d-inline-block ml-2">
+                    {{ csrf_token_field() if csrf_token_field else '' }} {# Для CSRF, если нужно #}
+                    <button type="submit" class="btn btn-outline-warning btn-sm"
+                            onclick="return confirm('Вы уверены, что хотите перегенерировать API-ключ? Старый ключ перестанет работать, и вам нужно будет обновить его в скрипте импорта Genshin.');">
+                        Перегенерировать
+                    </button>
+                </form>
             </div>
+            {% else %}
+            <p class="text-muted">API ключ еще не сгенерирован. Обычно он создается при регистрации.</p>
+            {% endif %}
+        </div>
+
+        {% if form_change_password %}
+        <div class="setting-item mt-3">
+            <details class="profile-details-form">
+                <summary>Сменить пароль</summary>
+                <form method="POST" action="{{ url_for('auth.user_profile') }}" class="auth-form mt-2">
+                    {{ form_change_password.hidden_tag() }}
+                    <div class="form-group">
+                        {{ form_change_password.current_password.label(class="form-label") }}
+                        {{ form_change_password.current_password(class="form-control" + (" is-invalid" if
+                        form_change_password.current_password.errors else "")) }}
+                        {% if form_change_password.current_password.errors %}
+                        <div class="invalid-feedback">...</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form_change_password.new_password.label(class="form-label") }}
+                        {{ form_change_password.new_password(class="form-control" + (" is-invalid" if
+                        form_change_password.new_password.errors else "")) }}
+                        {% if form_change_password.new_password.errors %}
+                        <div class="invalid-feedback">...</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form_change_password.confirm_new_password.label(class="form-label") }}
+                        {{ form_change_password.confirm_new_password(class="form-control" + (" is-invalid" if
+                        form_change_password.confirm_new_password.errors else "")) }}
+                        {% if form_change_password.confirm_new_password.errors %}
+                        <div class="invalid-feedback">...</div>
+                        {% endif %}
+                    </div>
+                    <button type="submit" name="submit_password" class="btn btn-primary btn-sm">Сменить пароль</button>
+                </form>
+            </details>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="profile-section">
+        <h3 class="section-title-sm">Интеграции</h3>
+        <div class="setting-item">
+            <h4>Steam Аккаунт</h4>
+            {% if current_user.steam_id %}
+            <div class="steam-connected">
+                <img src="{{ url_for('static', filename='img/game_icons/steam_logo.svg') }}" alt="Steam"
+                     class="steam-logo-profile">
+                <span>Ваш Steam аккаунт успешно подключен! (SteamID64: {{ current_user.steam_id }})</span>
+            </div>
+            {#
+            <form method="POST" action="{{ url_for('auth.steam_disconnect') }}" class="mt-2">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Отключить Steam</button>
+            </form>
+            #}
+            {% else %}
+            <p class="text-muted small mb-2">Подключите Steam для доступа к статистике CS2 и удобного входа.</p>
+            <a href="{{ url_for('auth.steam_login') }}" class="btn btn-steam btn-profile-connect">
+                <img src="{{ url_for('static', filename='img/game_icons/steam_logo.svg') }}" alt="Steam"
+                     class="btn-icon">
+                Подключить Steam
+            </a>
+            {% endif %}
         </div>
     </div>
+
+    {# Заглушка для других настроек #}
+    <div class="profile-section">
+        <h3 class="section-title-sm">Прочие настройки</h3>
+        <p class="text-muted">Настройки уведомлений, язык интерфейса и другие опции будут доступны здесь в будущем.</p>
+    </div>
+
 </div>
+{# ... (скрипт для копирования API-ключа и закрытия flash-сообщений) ... #}
+{# Не забудь передать form_edit_username и form_change_password из маршрута, если используешь #}
 {% endblock %}

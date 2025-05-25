@@ -1,70 +1,95 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
     {% if title %}
     <title>{{ title }} - Lootbox Analytics</title>
     {% else %}
     <title>Lootbox Analytics</title>
     {% endif %}
+
     <script>
         (function () {
             const theme = localStorage.getItem('theme');
-            if (theme === 'dark') {
+            const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (theme === 'dark' || (!theme && systemPrefersDark)) {
                 document.documentElement.setAttribute('data-theme', 'dark');
-            } else if (theme === 'light') {
-                document.documentElement.setAttribute('data-theme', 'light');
             } else {
-                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    document.documentElement.setAttribute('data-theme', 'dark');
-                }
+                document.documentElement.setAttribute('data-theme', 'light');
             }
         })();
     </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap"
+          rel="stylesheet">
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% block head_extra %}{% endblock %}
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}" type="image/png">
 </head>
 <body>
-<nav>
-    <div class="container nav-container">
+<header class="site-header">
+    <nav class="main-nav container">
+        <a href="{{ url_for('main.index') }}" class="nav-brand">
+            <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Lootbox Analytics Logo" class="nav-logo">
+            Lootbox Analytics
+        </a>
         <div class="nav-links">
-            <a href="{{ url_for('main.index') }}">Lootbox Analytics</a>
-            {% if current_user.is_anonymous %}
-            {% else %}
-            <a href="{{ url_for('main.dashboard') }}">Дашборд</a>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('main.dashboard') }}"
+               class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}">Дашборд</a>
             {% endif %}
         </div>
-        <div class="nav-user-actions">
+        <div class="nav-actions">
             {% if current_user.is_authenticated %}
             <span class="nav-username">Привет, {{ current_user.username }}!</span>
-            <a href="{{ url_for('auth.user_profile') }}">Профиль</a>
-            <a href="{{ url_for('auth.logout') }}">Выйти</a>
+            <a href="{{ url_for('auth.user_profile') }}"
+               class="nav-link {% if request.endpoint == 'auth.user_profile' %}active{% endif %}">Профиль</a>
+            <a href="{{ url_for('auth.logout') }}" class="nav-link">Выйти</a>
             {% else %}
-            <a href="{{ url_for('auth.login') }}">Войти</a>
-            <a href="{{ url_for('auth.register') }}">Регистрация</a>
+            <a href="{{ url_for('auth.login') }}"
+               class="nav-link {% if request.endpoint == 'auth.login' %}active{% endif %}">Войти</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary nav-btn-register">Регистрация</a>
             {% endif %}
             <div class="theme-switch-wrapper">
                 <label class="theme-switch" for="themeCheckbox">
                     <input type="checkbox" id="themeCheckbox"/>
-                    <div class="slider round">
-                        <span class="sun-icon"></span>
-                        <span class="moon-icon"></span>
-                    </div>
+                    <div class="slider round"></div>
                 </label>
             </div>
         </div>
+    </nav>
+</header>
+
+<main class="main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container flash-messages-container">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close-alert" data-dismiss-alert>×</button>
+        </div>
+        {% endfor %}
     </div>
-</nav>
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-{% for category, message in messages %}
-<div class="alert alert-{{ category }}">{{ message }}</div>
-{% endfor %}
-{% endif %}
-{% endwith %}
-{% block content %}{% endblock %}
+    {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+    <div class="container">
+        <p class="p-footer">© {{ current_year }} Lootbox Analytics. Все права защищены.</p>
+    </div>
+</footer>
+
 <script src="{{ url_for('static', filename='js/theme_switcher.js') }}"></script>
+{% block scripts_extra %}{% endblock %}
 </body>
 </html>

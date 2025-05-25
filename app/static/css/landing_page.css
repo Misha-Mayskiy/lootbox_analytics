@@ -19,6 +19,7 @@
     margin-bottom: 20px;
     font-weight: 700;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    color: #ffffff;
 }
 
 .landing-hero .lead {
@@ -148,16 +149,18 @@
 }
 
 [data-theme="dark"] .landing-cta {
-    --primary-accent-color: #377ef0;
+    --primary-accent-color: #2b2b2b;
 }
 
 
 .landing-cta h2 {
+    color: #ffffff;
     font-size: 2.2em;
     margin-bottom: 20px;
 }
 
 .landing-cta p {
+    color: #ffffff;
     font-size: 1.2em;
     margin-bottom: 30px;
     max-width: 600px;

@@ -1,0 +1,196 @@
+/* app/static/css/profile_page.css */
+
+.profile-page h1.display-5 {
+    font-weight: 700;
+    color: var(--heading-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+}
+
+.profile-page .lead {
+    font-size: 1.1rem;
+    color: var(--text-color-secondary, #6c757d);
+}
+
+[data-theme="dark"] .profile-page .lead {
+    --text-color-secondary: #a0aec0;
+}
+
+
+.profile-section {
+    background-color: var(--card-bg-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius-base, 8px);
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-section .section-title-sm {
+    font-size: 1.4rem; /* Чуть больше для заголовков секций */
+    font-weight: 600;
+    color: var(--heading-color);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent-yellow);
+    display: inline-block;
+}
+
+.profile-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.profile-info-grid > div {
+    margin-bottom: 0.5rem;
+}
+
+.profile-info-grid .info-label {
+    font-weight: 600;
+    color: var(--text-color-secondary, #555);
+    display: block; /* или inline-block с margin-right */
+    margin-bottom: 0.25rem;
+}
+
+[data-theme="dark"] .profile-info-grid .info-label {
+    --text-color-secondary: #a0b3d6;
+}
+
+.profile-info-grid .info-value {
+    color: var(--text-color);
+}
+
+.setting-item {
+    margin-bottom: 1.5rem;
+}
+
+.setting-item:last-child {
+    margin-bottom: 0;
+}
+
+.setting-item h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--heading-color);
+}
+
+.api-key-display {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap; /* Для переноса кнопки на маленьких экранах */
+}
+
+.api-key-display code.selectable-code {
+    font-size: 0.9em;
+    padding: 0.5em 0.75em;
+    background-color: var(--input-bg-color); /* Фон как у инпутов */
+    border: 1px solid var(--input-border-color);
+    border-radius: 4px;
+    word-break: break-all;
+    color: var(--input-text-color);
+    flex-grow: 1; /* Занимает доступное место */
+    margin-right: 0.5rem; /* Отступ до кнопки */
+    margin-bottom: 0.5rem; /* Отступ снизу, если кнопка перенесется */
+}
+
+[data-theme="dark"] .api-key-display code.selectable-code {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: var(--accent-yellow); /* Выделяем ключ */
+}
+
+.api-key-display code.selectable-code:hover {
+    background-color: var(--input-focus-border-color) !important; /* Используем цвет фокуса */
+}
+
+
+.btn-steam.btn-profile-connect { /* Специфичный стиль для кнопки на странице профиля */
+    /* display: inline-flex; /* Чтобы иконка и текст были в строку и по центру */
+    /* align-items: center; */
+    /* padding: 0.5rem 1rem; /* Меньше паддинг */
+    /* font-size: 0.95rem; */
+    /* Использует общие стили .btn-steam из auth_forms.css или style.css */
+}
+
+.btn-steam .btn-icon, .steam-logo-profile {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+.steam-connected {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    background-color: var(--bg-color-success-subtle, #d1e7dd); /* Легкий фон успеха */
+    border: 1px solid var(--border-color-success-subtle, #badbcc);
+    border-radius: var(--border-radius-base, 8px);
+    color: var(--text-color-success, #0f5132);
+}
+
+[data-theme="dark"] .steam-connected {
+    --bg-color-success-subtle: #1c3a2f;
+    --border-color-success-subtle: #2f5d48;
+    --text-color-success: #75b798;
+}
+
+.steam-connected span {
+    margin-left: 0.5rem;
+}
+
+
+/* Стили для <details> и <summary> (скрывающиеся формы) */
+details.profile-details-form {
+    margin-top: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-base, 6px);
+    background-color: var(--bg-color); /* Чуть отличный фон, если основной фон страницы другой */
+}
+
+[data-theme="dark"] details.profile-details-form {
+    background-color: #22272e; /* Слегка темнее карточки */
+}
+
+
+details.profile-details-form summary {
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none; /* Убираем стандартный маркер */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--link-color);
+    border-bottom: 1px solid transparent; /* Для открытого состояния */
+}
+
+details.profile-details-form summary::-webkit-details-marker { /* Chrome/Safari */
+    display: none;
+}
+
+details.profile-details-form summary::after { /* Кастомный маркер (стрелка) */
+    content: '▼'; /* Стрелка вниз */
+    font-size: 0.8em;
+    transition: transform 0.2s ease-out;
+    color: var(--text-color-secondary);
+}
+
+details.profile-details-form[open] summary {
+    border-bottom-color: var(--border-color);
+}
+
+details.profile-details-form[open] summary::after {
+    transform: rotate(180deg); /* Стрелка вверх */
+}
+
+details.profile-details-form .auth-form { /* Форма внутри details */
+    padding: 1.25rem;
+    border-top: 1px solid var(--border-color); /* Отделить от summary, если summary без рамки снизу */
+}
+
+details.profile-details-form[open] summary {
+    border-bottom-color: transparent; /* Убираем рамку у summary, т.к. она будет у формы */
+}

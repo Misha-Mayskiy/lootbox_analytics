@@ -1,3 +1,4 @@
+import datetime
 import os
 from dotenv import load_dotenv
 
@@ -14,3 +15,4 @@ class Config:
     STEAM_API_KEY = os.environ.get('STEAM_API_KEY')
     PREFERRED_URL_SCHEME = 'https'
     SESSION_COOKIE_SECURE = True
+    REMEMBER_COOKIE_DURATION = datetime.timedelta(days=30)

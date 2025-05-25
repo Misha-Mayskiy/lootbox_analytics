@@ -1,6 +1,6 @@
+import datetime
 from flask import Flask
 from flask_wtf import CSRFProtect
-
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -65,6 +65,10 @@ def create_app(config_class=Config):
 
     if not os.path.exists(app.config['OPENID_FS_STORE_PATH']):
         os.makedirs(app.config['OPENID_FS_STORE_PATH'])
+
+    @app.context_processor
+    def inject_current_year():
+        return {'current_year': datetime.datetime.now().year}
 
     return app
 

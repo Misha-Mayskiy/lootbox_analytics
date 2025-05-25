@@ -1,7 +1,9 @@
-from flask import Blueprint, render_template, url_for, redirect, flash
+from flask import Blueprint, render_template, url_for, redirect, flash, current_app
 from flask_login import login_required, current_user
+from sqlalchemy import func
 
-from app.models import Game, UserCS2InventoryItem
+from app import db
+from app.models import Game, UserCS2InventoryItem, UserDrop
 from app.services.genshin_stats_service import GenshinPityTracker, PITY_LIMITS
 
 bp = Blueprint('main', __name__, template_folder='../../templates/main')
@@ -16,7 +18,83 @@ def index():
 @bp.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('main/dashboard.html', title='Дашборд')
+    recent_activity = []
+
+    # Получаем объекты игр из базы данных
+    game_genshin = Game.query.filter_by(slug='genshin').first()
+    game_cs2 = Game.query.filter_by(slug='cs2').first()
+
+    # --- Активность для Genshin Impact ---
+    if game_genshin:
+        # 1. Последний импорт
+        latest_genshin_drop_time = UserDrop.query.with_entities(func.max(UserDrop.timestamp)) \
+            .filter_by(user_id=current_user.id, game_id=game_genshin.id).scalar()
+
+        if latest_genshin_drop_time:
+            recent_activity.append({
+                'game': 'Genshin Impact',
+                'icon': url_for('static', filename='img/game_icons/genshin-impact.svg'),
+                'text': f"Данные импортированы",
+                'time': latest_genshin_drop_time,
+                'link': url_for('main.genshin_import_url_page')
+            })
+
+        # 2. Последний 5-звездочный дроп
+        last_genshin_5star_drop = UserDrop.query.filter_by(
+            user_id=current_user.id,
+            game_id=game_genshin.id,
+            item_rarity_text='5'
+        ).order_by(UserDrop.timestamp.desc()).first()
+
+        if last_genshin_5star_drop:
+            recent_activity.append({
+                'game': 'Genshin Impact',
+                'icon': url_for('static', filename='img/game_icons/genshin-impact.svg'),
+                'text': f"Получен 5★: {last_genshin_5star_drop.item_name}",
+                'time': last_genshin_5star_drop.timestamp,
+                'link': url_for('main.genshin_stats_page')
+            })
+    else:
+        current_app.logger.warning("Объект игры Genshin Impact не найден в БД для дашборда.")
+
+    # --- Активность для CS2 ---
+    if game_cs2:
+        # 1. Время последней синхронизации инвентаря
+        last_cs2_sync_time = UserCS2InventoryItem.query.with_entities(func.max(UserCS2InventoryItem.snapshot_time)) \
+            .filter_by(user_id=current_user.id, game_id=game_cs2.id).scalar()
+
+        if last_cs2_sync_time:
+            recent_activity.append({
+                'game': 'Counter-Strike 2',
+                'icon': url_for('static', filename='img/game_icons/counter-strike.svg'),  # Проверь имя файла
+                'text': "Инвентарь CS2 синхронизирован",
+                'time': last_cs2_sync_time,
+                'link': url_for('main.cs2_stats_page')  # Ссылка на статистику CS2
+            })
+
+        # 2. Последний "ценный" предмет из инвентаря CS2
+        last_valuable_cs2_item = UserCS2InventoryItem.query.filter(
+            UserCS2InventoryItem.user_id == current_user.id,
+            UserCS2InventoryItem.game_id == game_cs2.id,
+            UserCS2InventoryItem.rarity_internal_name.in_(['Rarity_Ancient_Weapon', 'Rarity_Contraband'])  # Пример
+        ).order_by(UserCS2InventoryItem.snapshot_time.desc()).first()  # По времени снимка
+        if last_valuable_cs2_item:
+            recent_activity.append({
+                'game': 'Counter-Strike 2',
+                'icon': url_for('static', filename='img/game_icons/counter-strike.svg'),
+                'text': f"Обнаружен предмет: {last_valuable_cs2_item.name}",
+                'time': last_valuable_cs2_item.snapshot_time,
+                'link': url_for('main.cs2_stats_page')
+            })
+    else:
+        current_app.logger.warning("Объект игры CS2 не найден в БД для дашборда.")
+
+    valid_recent_activity = [ra for ra in recent_activity if ra.get('time') is not None]
+    sorted_recent_activity = sorted(valid_recent_activity, key=lambda x: x['time'], reverse=True)[:5]
+
+    return render_template('main/dashboard.html',
+                           title="Дашборд",
+                           recent_activity=sorted_recent_activity)
 
 
 @bp.route('/dashboard/genshin/import-url')
@@ -175,3 +253,13 @@ def cs2_stats_page():
                            roi=roi,
                            rarity_chart_data=rarity_chart_data,
                            type_chart_data=type_chart_data)
+
+
+@bp.route('/profile/regenerate-api-key', methods=['POST'])
+@login_required
+def regenerate_api_key():
+    import secrets
+    current_user.api_key = secrets.token_hex(32)
+    db.session.commit()
+    flash('Ваш API-ключ был успешно перегенерирован.', 'success')
+    return redirect(url_for('main.user_profile'))

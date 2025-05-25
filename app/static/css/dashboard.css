@@ -1,0 +1,326 @@
+.dashboard-container {
+    /* Дополнительные стили для контейнера дашборда, если нужны */
+}
+
+.dashboard-header {
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem !important; /* Увеличиваем отступ */
+    border-bottom: 1px solid var(--border-color);
+}
+
+.dashboard-header h1 {
+    font-weight: 700;
+    color: var(--heading-color);
+}
+
+.dashboard-header .lead {
+    font-size: 1.1rem;
+    color: var(--text-color-secondary, #6c757d); /* Используем переменную или стандартный цвет Bootstrap */
+}
+
+[data-theme="dark"] .dashboard-header .lead {
+    --text-color-secondary: #a0aec0;
+}
+
+
+.api-key-info { /* Стилизация блока с API ключом */
+    background-color: var(--card-bg-color); /* Фон как у карточки */
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.api-key-info code {
+    font-size: 0.9em;
+    word-break: break-all; /* Чтобы длинный ключ переносился */
+}
+
+[data-theme="dark"] .api-key-info code.bg-light { /* Адаптация Bootstrap класса */
+    background-color: #374151 !important; /* Темнее */
+    color: var(--accent-yellow) !important; /* Акцентный цвет для ключа */
+}
+
+
+.section-title {
+    font-weight: 600;
+    margin-bottom: 1.5rem !important;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent-yellow); /* Акцентная линия под заголовком секции */
+    display: inline-block; /* Чтобы линия была по ширине текста */
+}
+
+/* Стили для карточек игр */
+.game-card {
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
+    border: 1px solid var(--border-color); /* Убедимся, что рамка есть */
+}
+
+.game-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.game-card-banner {
+    height: 120px; /* Высота "шапки" карточки */
+    background-color: #e9ecef; /* Дефолтный фон для баннера */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top-left-radius: calc(8px - 1px); /* Учитываем рамку карточки */
+    border-top-right-radius: calc(8px - 1px);
+    overflow: hidden; /* Если будет фоновое изображение */
+    position: relative; /* Для позиционирования иконки */
+}
+
+/* Кастомные фоны для баннеров (примеры, можно использовать градиенты или изображения) */
+.genshin-banner {
+    background: linear-gradient(135deg, #42628f 0%, #86a8d9 100%);
+}
+
+.cs2-banner {
+    background: linear-gradient(135deg, #de9b35 0%, #f7c35b 100%);
+}
+
+.hsr-banner {
+    background: linear-gradient(135deg, #3c4a8f 0%, #7b8be0 100%);
+}
+
+.hs-banner {
+    background: linear-gradient(135deg, #7a5a4f 0%, #c89f67 100%);
+}
+
+[data-theme="dark"] .game-card-banner {
+    background-color: #2c323a;
+}
+
+[data-theme="dark"] .genshin-banner {
+    background: linear-gradient(135deg, #2a3f5e 0%, #506b96 100%);
+}
+
+[data-theme="dark"] .cs2-banner {
+    background: linear-gradient(135deg, #8c6221 0%, #b58e3a 100%);
+}
+
+[data-theme="dark"] .hsr-banner {
+    background: linear-gradient(135deg, #2d376b 0%, #4c5a9e 100%);
+}
+
+[data-theme="dark"] .hs-banner {
+    background: linear-gradient(135deg, #503c34 0%, #8e6e45 100%);
+}
+
+
+.game-card-icon {
+    width: 64px; /* Размер иконки в "шапке" карточки */
+    height: 64px;
+    /* filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3)); /* Легкая тень для иконки */
+}
+
+.game-card-icon svg path {
+    stroke: #ffffff;
+    stroke-width: 1px;
+}
+
+.game-card-icon.placeholder-icon {
+    opacity: 0.5; /* Полупрозрачные для заглушек */
+}
+
+.game-card .card-body {
+    padding-top: 1rem; /* Уменьшаем отступ сверху, т.к. есть баннер */
+}
+
+.game-card .game-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.game-card .card-text.small {
+    font-size: 0.875rem;
+    min-height: 50px; /* Чтобы текстовые блоки были примерно одной высоты */
+    margin-bottom: 1rem;
+}
+
+.game-card-btn {
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+.game-card-btn.disabled {
+    pointer-events: none;
+    opacity: 0.65;
+}
+
+.badge.badge-info { /* Стили для бейджа "Скоро" */
+    background-color: var(--accent-orange);
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.3em 0.6em;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border-radius: 4px;
+}
+
+[data-theme="dark"] .badge.badge-info {
+    background-color: var(--accent-orange);
+    color: #121212;
+}
+
+/* Класс для копируемого кода */
+code.selectable-code {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+code.selectable-code:hover {
+    background-color: #e9ecef !important; /* Bootstrap .bg-light цвет */
+}
+
+[data-theme="dark"] code.selectable-code:hover {
+    background-color: #495057 !important; /* Темнее для темной темы */
+}
+
+.btn-outline-accent { /* Новый класс для такой кнопки */
+    color: var(--accent-orange);
+    border-color: var(--accent-orange);
+    background-color: transparent;
+    font-weight: 600; /* Более отчетливый текст */
+}
+
+.btn-outline-accent:hover {
+    color: var(--bg-color); /* Текст станет цветом фона */
+    background-color: var(--accent-orange);
+    border-color: var(--accent-orange);
+    text-decoration: none;
+}
+
+[data-theme="dark"] .btn-outline-accent {
+    color: var(--accent-orange);
+    border-color: var(--accent-orange);
+}
+
+[data-theme="dark"] .btn-outline-accent:hover {
+    color: #121212; /* Темный текст на оранжевом */
+    background-color: var(--accent-orange);
+    border-color: var(--accent-orange);
+}
+
+/* --- Недавняя Активность на Дашборде --- */
+.recent-activity-section {
+    /* margin-top уже есть в HTML */
+}
+
+.recent-activity-section .section-title { /* Если используешь такой же класс заголовка */
+    /* Стили уже должны быть в style.css */
+}
+
+.list-group.list-group-flush .list-group-item.recent-activity-item {
+    background-color: var(--card-bg-color); /* Фон как у карточек */
+    border-color: var(--border-color); /* Рамка как у карточек */
+    padding: 0; /* Убираем дефолтный padding у list-group-item, т.к. он будет у .activity-link */
+}
+
+/* Убираем верхнюю рамку у первого элемента и нижнюю у последнего, если flush */
+.list-group.list-group-flush .list-group-item.recent-activity-item:first-child {
+    border-top-width: 0;
+    border-top-left-radius: 8px; /* Скругление для группы */
+    border-top-right-radius: 8px;
+}
+
+.list-group.list-group-flush .list-group-item.recent-activity-item:last-child {
+    border-bottom-width: 0;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Если не flush, а просто list-group, то рамки нужны */
+.list-group:not(.list-group-flush) .list-group-item.recent-activity-item {
+    margin-bottom: -1px; /* Чтобы рамки накладывались */
+}
+
+.list-group:not(.list-group-flush) .list-group-item.recent-activity-item:last-child {
+    margin-bottom: 0;
+}
+
+
+.activity-link {
+    display: flex;
+    align-items: center;
+    padding: 0.85rem 1.25rem; /* Паддинг для содержимого */
+    text-decoration: none;
+    color: var(--text-color);
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    width: 100%; /* Чтобы ссылка занимала всю ширину li */
+}
+
+.activity-link:hover {
+    background-color: var(--nav-link-active-bg); /* Или другой цвет для hover */
+    color: var(--link-hover-color); /* Или var(--text-color) */
+    text-decoration: none;
+}
+
+.activity-game-icon {
+    width: 28px; /* Немного увеличил иконку */
+    height: 28px;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    border-radius: 4px; /* Легкое скругление иконки */
+}
+
+.activity-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Центрируем текст, если он в одну строку */
+}
+
+.activity-text {
+    font-weight: 600; /* Сделаем основной текст жирнее */
+    font-size: 0.95rem;
+    color: var(--heading-color); /* Цвет как у заголовков */
+    margin-bottom: 0.1rem;
+    line-height: 1.3;
+}
+
+.activity-time {
+    font-size: 0.8rem;
+    color: var(--text-color-secondary, #6c757d); /* Используем переменную */
+}
+
+[data-theme="dark"] .activity-time {
+    --text-color-secondary: #a0aec0;
+}
+
+
+.activity-arrow {
+    font-size: 1.3rem; /* Стрелка побольше */
+    color: var(--text-color-secondary, #6c757d);
+    margin-left: 1rem;
+    transition: transform 0.2s ease-out, color 0.2s ease-out;
+}
+
+[data-theme="dark"] .activity-arrow {
+    --text-color-secondary: #a0aec0;
+}
+
+
+.activity-link:hover .activity-arrow {
+    transform: translateX(4px);
+    color: var(--accent-orange);
+}
+
+.activity-game-icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    border-radius: 4px;
+    /* Добавляем transition для плавности, если фильтр будет меняться */
+    transition: filter 0.3s ease-in-out;
+}
+
+[data-theme="dark"] .activity-game-icon {
+    filter: invert(1) brightness(1.1);
+}
