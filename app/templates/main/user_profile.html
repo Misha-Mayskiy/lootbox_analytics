@@ -11,18 +11,6 @@
         <p class="lead text-muted">Управление вашим аккаунтом и настройками Lootbox Analytics.</p>
     </div>
 
-    {# Отображение flash-сообщений #}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="alert alert-{{ category }} alert-dismissible fade show mb-3" role="alert">
-        {{ message }}
-        <button type="button" class="close-alert" data-dismiss-alert>×</button>
-    </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
-
     <div class="profile-section">
         <h3 class="section-title-sm">Основная информация</h3>
         <div class="profile-info-grid">
@@ -47,25 +35,32 @@
                 <span class="info-value">{{ current_user.created_at.strftime('%d %B %Y, %H:%M') if current_user.created_at else 'N/A' }}</span>
             </div>
         </div>
-        {# Сюда можно добавить формы для изменения username/email в модальных окнах или на отдельных страницах #}
         {% if form_edit_username %}
-        <details class="profile-details-form mt-3">
-            <summary>Сменить имя пользователя</summary>
-            <form method="POST" action="{{ url_for('auth.user_profile') }}" class="auth-form mt-2">
-                {{ form_edit_username.hidden_tag() }}
-                <div class="form-group">
-                    {{ form_edit_username.username.label(class="form-label sr-only") }} {# Скрываем label, т.к. есть
-                    summary #}
-                    {{ form_edit_username.username(class="form-control" + (" is-invalid" if
-                    form_edit_username.username.errors else ""), placeholder="Новое имя пользователя") }}
-                    {% if form_edit_username.username.errors %}
-                    <div class="invalid-feedback">
-                        {% for error in form_edit_username.username.errors %}<span>{{ error }}</span>{% endfor %}
-                    </div>
-                    {% endif %}
+        <details class="profile-details-form mt-3" data-form-name="username">
+        <summary>Сменить имя пользователя</summary>
+        {% if not can_change_username %}
+        <div class="alert alert-warning mt-2">
+            Вы сможете сменить имя пользователя снова через {{ time_until_next_username_change }}.
+        </div>
+        {% endif %}
+        <form method="POST" action="{{ url_for('auth.user_profile') }}" class="auth-form mt-2">
+            {{ form_edit_username.hidden_tag() }}
+            <div class="form-group">
+                {{ form_edit_username.username.label(class="form-label sr-only") }}
+                {{ form_edit_username.username(class="form-control" + (" is-invalid" if
+                form_edit_username.username.errors else ""),
+                placeholder="Новое имя пользователя",
+                disabled=not can_change_username) }}
+                {% if form_edit_username.username.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form_edit_username.username.errors %}<span>{{ error }}</span>{% endfor %}
                 </div>
-                <button type="submit" name="submit_username" class="btn btn-primary btn-sm">Сохранить имя</button>
-            </form>
+                {% endif %}
+            </div>
+            <button type="submit" name="submit_username" class="btn btn-primary btn-sm"
+                    {% if not can_change_username %}disabled{% endif %}>Сохранить имя
+            </button>
+        </form>
         </details>
         {% endif %}
     </div>
@@ -74,25 +69,26 @@
         <h3 class="section-title-sm">Безопасность и Доступ</h3>
         <div class="setting-item">
             <h4>API Ключ</h4>
-            {% if current_user.api_key %}
             <div class="api-key-display">
-                <code class="selectable-code">{{ current_user.api_key }}</code>
-                <form method="POST" action="{{ url_for('main.regenerate_api_key') }}" class="d-inline-block ml-2">
-                    {{ csrf_token_field() if csrf_token_field else '' }} {# Для CSRF, если нужно #}
-                    <button type="submit" class="btn btn-outline-warning btn-sm"
-                            onclick="return confirm('Вы уверены, что хотите перегенерировать API-ключ? Старый ключ перестанет работать, и вам нужно будет обновить его в скрипте импорта Genshin.');">
-                        Перегенерировать
-                    </button>
-                </form>
+                <div class="api-key-container position-relative">
+                    {% if current_user.api_key %}
+                    <code class="selectable-code" title="Нажмите, чтобы скопировать">{{ current_user.api_key }}</code>
+                    {% else %}
+                    <p class="text-muted">API ключ еще не сгенерирован.</p>
+                    {% endif %}
+                    <span class="copy-notification"
+                          style="display:none; position:absolute; top:-25px; left:0; background-color:var(--accent-green, #28a745); color:white; padding:2px 6px; border-radius:3px; font-size:0.8em;">Скопировано!</span>
+                    <form method="POST" action="{{ url_for('main.regenerate_api_key') }}" class="d-inline-block ml-2">
+                        {{ form_regenerate_api.hidden_tag() }}
+                        {{ form_regenerate_api.submit(class="btn btn-outline-warning btn-sm", style="border-radius: 10px; border: 2px dashed #ffc107;", onclick="return confirm('Вы уверены что хотите перегенерировать ваш API-Key?');") }}
+                    </form>
+                </div>
             </div>
-            {% else %}
-            <p class="text-muted">API ключ еще не сгенерирован. Обычно он создается при регистрации.</p>
-            {% endif %}
         </div>
 
         {% if form_change_password %}
         <div class="setting-item mt-3">
-            <details class="profile-details-form">
+            <details class="profile-details-form" data-form-name="password">
                 <summary>Сменить пароль</summary>
                 <form method="POST" action="{{ url_for('auth.user_profile') }}" class="auth-form mt-2">
                     {{ form_change_password.hidden_tag() }}
@@ -133,7 +129,7 @@
             <h4>Steam Аккаунт</h4>
             {% if current_user.steam_id %}
             <div class="steam-connected">
-                <img src="{{ url_for('static', filename='img/game_icons/steam_logo.svg') }}" alt="Steam"
+                <img src="{{ url_for('static', filename='img/game_icons/steam-logo.svg') }}" alt="Steam"
                      class="steam-logo-profile">
                 <span>Ваш Steam аккаунт успешно подключен! (SteamID64: {{ current_user.steam_id }})</span>
             </div>
@@ -143,9 +139,9 @@
             </form>
             #}
             {% else %}
-            <p class="text-muted small mb-2">Подключите Steam для доступа к статистике CS2 и удобного входа.</p>
+            <p class="text-muted small mb-2">Подключите Steam для доступа к некоторым статистикам и удобного входа.</p>
             <a href="{{ url_for('auth.steam_login') }}" class="btn btn-steam btn-profile-connect">
-                <img src="{{ url_for('static', filename='img/game_icons/steam_logo.svg') }}" alt="Steam"
+                <img src="{{ url_for('static', filename='img/game_icons/steam-logo.svg') }}" alt="Steam"
                      class="btn-icon">
                 Подключить Steam
             </a>
@@ -153,13 +149,46 @@
         </div>
     </div>
 
-    {# Заглушка для других настроек #}
     <div class="profile-section">
         <h3 class="section-title-sm">Прочие настройки</h3>
         <p class="text-muted">Настройки уведомлений, язык интерфейса и другие опции будут доступны здесь в будущем.</p>
     </div>
 
 </div>
-{# ... (скрипт для копирования API-ключа и закрытия flash-сообщений) ... #}
-{# Не забудь передать form_edit_username и form_change_password из маршрута, если используешь #}
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const activeFormName = "{{ active_form }}";
+        if (activeFormName) {
+            const activeDetails = document.querySelector(`details.profile-details-form[data-form-name="${activeFormName}"]`);
+            if (activeDetails) {
+                activeDetails.open = true;
+            }
+        }
+        const apiKeyContainers = document.querySelectorAll('.api-key-container');
+        apiKeyContainers.forEach(container => {
+            const codeBlock = container.querySelector('code.selectable-code');
+            const notification = container.querySelector('.copy-notification');
+
+            if (codeBlock) {
+                codeBlock.addEventListener('click', function () {
+                    const textToCopy = this.innerText;
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        if (notification) {
+                            notification.style.display = 'inline';
+                            setTimeout(() => {
+                                notification.style.display = 'none';
+                            }, 1500);
+                        }
+                    }).catch(err => {
+                        console.warn('Ошибка копирования API ключа: ', err);
+                    });
+                });
+            }
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename='js/forms_anims.js') }}"></script>
 {% endblock %}

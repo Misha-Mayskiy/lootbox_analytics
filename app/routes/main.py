@@ -262,4 +262,4 @@ def regenerate_api_key():
     current_user.api_key = secrets.token_hex(32)
     db.session.commit()
     flash('Ваш API-ключ был успешно перегенерирован.', 'success')
-    return redirect(url_for('main.user_profile'))
+    return redirect(url_for('auth.user_profile'))

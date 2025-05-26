@@ -10,7 +10,7 @@
 }
 
 [data-theme="dark"] .landing-hero {
-    --hero-bg-color: linear-gradient(135deg, #373b44 0%, #232526 100%);
+    --hero-bg-color: linear-gradient(135deg, #306ee1 0%, #890252 100%);
     --hero-text-color: #e0e0e0;
 }
 
@@ -149,7 +149,7 @@
 }
 
 [data-theme="dark"] .landing-cta {
-    --primary-accent-color: #2b2b2b;
+    --primary-accent-color: #553d7b;
 }
 
 
@@ -169,7 +169,7 @@
 }
 
 :root {
-    --hero-bg-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --hero-bg-color: linear-gradient(135deg, #306ee1 0%, #890252 100%);
     --hero-text-color: #ffffff;
     --button-secondary-bg: rgba(255, 255, 255, 0.2);
     --button-secondary-text: #fff;

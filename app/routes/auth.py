@@ -1,3 +1,4 @@
+import datetime
 import re
 import secrets
 from urllib.parse import urlparse, urljoin, urlunparse, urlencode
@@ -5,12 +6,9 @@ from urllib.parse import urlparse, urljoin, urlunparse, urlencode
 import requests
 from flask import render_template, redirect, url_for, flash, request, Blueprint, current_app, session
 from flask_login import login_user, logout_user, current_user, login_required
-from flask_wtf import FlaskForm
-from wtforms import PasswordField, SubmitField
-from wtforms.validators import Length, DataRequired, EqualTo
 
 from app import db
-from app.forms import LoginForm, RegistrationForm, EditUsernameForm, ChangePasswordForm
+from app.forms import LoginForm, RegistrationForm, EditUsernameForm, ChangePasswordForm, RegenerateApiKeyForm
 from app.models import User
 
 bp = Blueprint('auth', __name__,
@@ -110,11 +108,15 @@ def get_steam_user_info_api(steam_id):
 
 @bp.route('/steam/login')
 def steam_login():
-    if current_user.is_authenticated:
-        next_url = request.args.get('next')
-        if next_url:
-            session['next_url_after_steam_login'] = next_url
-        return redirect(url_for('main.dashboard'))
+    if current_user.is_authenticated and current_user.steam_id:
+        flash('Ваш Steam аккаунт уже подключен.', 'info')
+        return redirect(url_for('auth.user_profile'))
+
+    if current_user.is_authenticated and not current_user.steam_id:
+        session['next_url_after_steam_login'] = url_for('auth.user_profile', _external=True)
+
+    elif 'next' in request.args:
+        session['next_url_after_steam_login'] = request.args.get('next')
 
     base_url = request.url_root
     if base_url.endswith('/'):
@@ -171,47 +173,69 @@ def steam_callback():
 
     steam_id = match.group(1)
 
-    user = User.query.filter_by(steam_id=steam_id).first()
-    if user is None:
-        steam_user_info = get_steam_user_info_api(steam_id)
-        username_candidate = f"steam_{steam_id}"
-        if steam_user_info and 'personaname' in steam_user_info:
-            username_candidate = steam_user_info['personaname']
-            base_username = username_candidate
-            count = 1
-            while User.query.filter_by(username=username_candidate).first():
-                username_candidate = f"{base_username}_{count}"
-                count += 1
+    if current_user.is_authenticated:
+        existing_steam_user = User.query.filter(User.steam_id == steam_id, User.id != current_user.id).first()
+        if existing_steam_user:
+            flash('Этот Steam аккаунт уже привязан к другому профилю.', 'danger')
+            return redirect(url_for('auth.user_profile'))
 
-        email_candidate = f"{steam_id}@steam.local"
-        if User.query.filter_by(email=email_candidate).first() and User.email.nullable is False:
-            pass
-
-        user = User(
-            steam_id=steam_id,
-            username=username_candidate,
-            email=email_candidate
-        )
-
-        user.api_key = secrets.token_hex(32)
-        db.session.add(user)
+        current_user.steam_id = steam_id
+        db.session.add(current_user)
         try:
             db.session.commit()
-            flash(f'Вы успешно вошли через Steam как {user.username} и для вас создан новый аккаунт!', 'success')
+            flash('Ваш Steam аккаунт успешно подключен!', 'success')
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Ошибка создания Steam пользователя (ручная реализация): {e}")
-            flash(f'Ошибка при создании пользователя Steam: {e}', 'danger')
-            return redirect(url_for('auth.login'))
+            current_app.logger.error(f"Ошибка привязки SteamID {steam_id} к user {current_user.id}: {e}")
+            flash('Произошла ошибка при подключении Steam аккаунта.', 'danger')
+
+        next_url = session.pop('next_url_after_steam_login', None) or url_for('auth.user_profile')
+        if not is_safe_url(next_url):
+            next_url = url_for('main.dashboard')
+        return redirect(next_url)
+
     else:
-        flash(f'С возвращением, {user.username}! Вы вошли через Steam.', 'success')
+        user = User.query.filter_by(steam_id=steam_id).first()
+        if user is None:
+            steam_user_info = get_steam_user_info_api(steam_id)
+            username_candidate = f"steam_{steam_id}"
+            if steam_user_info and 'personaname' in steam_user_info:
+                username_candidate = steam_user_info['personaname']
+                base_username = username_candidate
+                count = 1
+                while User.query.filter_by(username=username_candidate).first():
+                    username_candidate = f"{base_username}_{count}"
+                    count += 1
 
-    login_user(user)
+            email_candidate = f"{steam_id}@steam.local"
+            if User.query.filter_by(email=email_candidate).first() and User.email.nullable is False:
+                pass
 
-    next_url = session.pop('next_url_after_steam_login', None) or url_for('main.dashboard')
-    if not is_safe_url(next_url):
-        next_url = url_for('main.dashboard')
-    return redirect(next_url)
+            user = User(
+                steam_id=steam_id,
+                username=username_candidate,
+                email=email_candidate
+            )
+
+            user.api_key = secrets.token_hex(32)
+            db.session.add(user)
+            try:
+                db.session.commit()
+                flash(f'Вы успешно вошли через Steam как {user.username} и для вас создан новый аккаунт!', 'success')
+            except Exception as e:
+                db.session.rollback()
+                current_app.logger.error(f"Ошибка создания Steam пользователя (ручная реализация): {e}")
+                flash(f'Ошибка при создании пользователя Steam: {e}', 'danger')
+                return redirect(url_for('auth.login'))
+        else:
+            flash(f'С возвращением, {user.username}! Вы вошли через Steam.', 'success')
+
+        login_user(user)
+
+        next_url = session.pop('next_url_after_steam_login', None) or url_for('main.dashboard')
+        if not is_safe_url(next_url):
+            next_url = url_for('main.dashboard')
+        return redirect(next_url)
 
 
 @bp.route('/profile', methods=['GET', 'POST'])
@@ -219,48 +243,81 @@ def steam_callback():
 def user_profile():
     form_edit_username = EditUsernameForm(current_user.username, prefix="edit_username")  # Добавляем префикс
     form_change_password = ChangePasswordForm(prefix="change_password")  # Добавляем префикс
+    form_regenerate_api = RegenerateApiKeyForm(prefix="regen_api")
+
+    can_change_username = True
+    time_until_next_username_change_str = ""
+
+    if current_user.username_last_changed_at:
+        # Убедимся, что username_last_changed_at - это aware datetime, если оно из БД может быть naive
+        last_change_aware = current_user.username_last_changed_at
+        if last_change_aware.tzinfo is None:
+            last_change_aware = last_change_aware.replace(tzinfo=datetime.timezone.utc)
+
+        time_since_last_change = datetime.datetime.now(datetime.timezone.utc) - last_change_aware
+
+        # Устанавливаем интервал (например, 1 день или 1 минута для теста)
+        change_interval = datetime.timedelta(days=1)
+        # change_interval = datetime.timedelta(minutes=1) # Для теста
+
+        if time_since_last_change < change_interval:
+            can_change_username = False
+            time_remaining = change_interval - time_since_last_change
+            # Форматирование оставшегося времени
+            hours, remainder = divmod(time_remaining.total_seconds(), 3600)
+            minutes, seconds = divmod(remainder, 60)
+            if int(hours) > 0:
+                time_until_next_username_change_str = f"{int(hours)} ч {int(minutes)} мин"
+            elif int(minutes) > 0:
+                time_until_next_username_change_str = f"{int(minutes)} мин {int(seconds)} сек"
+            else:
+                time_until_next_username_change_str = f"{int(seconds)} сек"
+
+    active_form_name = None  # Для JS, чтобы раскрыть нужную <details>
 
     if request.method == 'POST':
-        if 'submit_username' in request.form and form_edit_username.validate_on_submit():
-            old_username = current_user.username
-            current_user.username = form_edit_username.username.data
-            try:
-                db.session.commit()
-                flash(f'Имя пользователя успешно изменено с "{old_username}" на "{current_user.username}".', 'success')
-                return redirect(url_for('main.user_profile'))
-            except Exception as e:
-                db.session.rollback()
-                current_app.logger.error(f"Ошибка смены username для user {current_user.id}: {e}")
-                flash('Произошла ошибка при смене имени пользователя. Возможно, такое имя уже занято.', 'danger')
+        if 'submit_username' in request.form:
+            active_form_name = 'username'
+            if not can_change_username:
+                flash(f'Вы сможете сменить имя пользователя снова через {time_until_next_username_change_str}.',
+                      'warning')
+            elif form_edit_username.validate_on_submit():
+                old_username = current_user.username
+                current_user.username = form_edit_username.username.data
+                current_user.username_last_changed_at = datetime.datetime.now(datetime.timezone.utc)
+                try:
+                    db.session.commit()
+                    flash(f'Имя пользователя успешно изменено с "{old_username}" на "{current_user.username}".',
+                          'success')
+                    return redirect(url_for('auth.user_profile'))
+                except Exception as e:
+                    db.session.rollback()
+                    current_app.logger.error(f"Ошибка смены username для user {current_user.id}: {e}")
+                    flash('Произошла ошибка при смене имени. Возможно, такое имя уже занято.', 'danger')
 
         elif 'submit_password' in request.form and form_change_password.validate_on_submit():
-            if current_user.password_hash and current_user.check_password(
-                    form_change_password.current_password.data):  # Проверка, что пароль вообще был установлен
+            active_form_name = 'password'
+            if current_user.password_hash and current_user.check_password(form_change_password.current_password.data):
                 current_user.set_password(form_change_password.new_password.data)
                 db.session.commit()
                 flash('Пароль успешно изменен.', 'success')
-                return redirect(url_for('main.user_profile'))
-            elif not current_user.password_hash:  # Если пользователь регался через Steam, у него нет пароля
+                return redirect(url_for('auth.user_profile'))
+            elif not current_user.password_hash:
                 flash('Вы вошли через Steam, установка пароля через эту форму невозможна.', 'warning')
             else:
                 flash('Неверный текущий пароль.', 'danger')
-                # Чтобы ошибки отобразились в форме, ее нужно передать снова
-                return render_template('main/user_profile.html',
-                                       title="Профиль пользователя",
-                                       form_edit_username=form_edit_username,
-                                       form_change_password=form_change_password,  # Передаем форму с ошибками
-                                       active_form='password')  # Для JS, чтобы раскрыть нужную <details>
 
-    # Для GET запроса или если POST не прошел валидацию для username
-    if form_edit_username.errors and 'submit_username' in request.form:
-        active_form = 'username'
-    elif form_change_password.errors and 'submit_password' in request.form:  # уже обработано выше с return
-        active_form = 'password'
-    else:
-        active_form = None
+    if not active_form_name:  # Если это GET или POST без ошибок, но не редирект
+        if form_edit_username.errors:
+            active_form_name = 'username'
+        elif form_change_password.errors:
+            active_form_name = 'password'
 
     return render_template('main/user_profile.html',
                            title="Профиль пользователя",
                            form_edit_username=form_edit_username,
                            form_change_password=form_change_password,
-                           active_form=active_form)
+                           form_regenerate_api=form_regenerate_api,  # Убедись, что она передается
+                           can_change_username=can_change_username,  # Передаем флаг
+                           time_until_next_username_change=time_until_next_username_change_str,  # Передаем строку
+                           active_form=active_form_name)  # Для JS

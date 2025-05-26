@@ -15,6 +15,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256))
     steam_id = db.Column(db.String(64), unique=True, nullable=True, index=True)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    username_last_changed_at = db.Column(db.DateTime, nullable=True)
     api_key = db.Column(db.String(128), unique=True, nullable=True, index=True)
     cs2_investment_amount = db.Column(db.Float, nullable=True, default=0.0)
 

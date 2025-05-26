@@ -59,3 +59,7 @@ class ChangePasswordForm(FlaskForm):
         EqualTo('new_password', message='Пароли должны совпадать')
     ])
     submit = SubmitField('Сменить пароль')
+
+
+class RegenerateApiKeyForm(FlaskForm):
+    submit = SubmitField('Перегенерировать')
