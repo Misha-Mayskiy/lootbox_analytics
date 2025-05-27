@@ -116,17 +116,6 @@
     background-color: #2b2b2b !important;
 }
 
-.btn-steam .btn-icon, .steam-logo-profile {
-    width: 20px;
-    height: 20px;
-    vertical-align: middle;
-    margin-right: 8px;
-}
-
-[data-theme="dark"] .steam-logo-profile {
-    filter: invert(100%);
-}
-
 .steam-connected {
     display: flex;
     align-items: center;

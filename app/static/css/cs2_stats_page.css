@@ -1,0 +1,155 @@
+.cs2-stats-page .page-header-icon {
+    width: 48px;
+    height: 48px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.cs2-stats-page .section-title-like { /* Используем для заголовков карточек, как .section-title */
+    font-weight: 600;
+    padding-bottom: 0.3rem;
+    border-bottom: 2px solid var(--accent-yellow);
+    display: inline-block;
+    margin-bottom: 0 !important; /* Для card-header */
+}
+
+.cs2-inventory-table .item-icon {
+    width: 70px;
+    height: 50px;
+    object-fit: contain;
+    background-color: var(--table-item-icon-bg, rgba(0, 0, 0, 0.05));
+    border-radius: 4px;
+    padding: 1px;
+    vertical-align: middle;
+}
+
+[data-theme="dark"] .cs2-inventory-table .item-icon {
+    --table-item-icon-bg: rgba(255, 255, 255, 0.05);
+}
+
+.cs2-inventory-table .item-name-link {
+    font-weight: 600;
+    /* color: var(--link-color); /* Уже наследуется */
+}
+
+.cs2-inventory-table tbody tr:hover {
+    background-color: var(--table-row-hover-bg, rgba(0, 0, 0, 0.06));
+}
+
+[data-theme="dark"] .cs2-inventory-table tbody tr:hover {
+    background-color: var(--table-row-hover-bg-dark, rgba(255, 255, 255, 0.06));
+}
+
+:root {
+    --table-row-hover-bg: rgba(0, 0, 0, 0.06);
+    --table-row-hover-bg-dark: rgba(255, 255, 255, 0.06);
+}
+
+
+.chart-container {
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-base, 8px);
+    background-color: var(--card-bg-color);
+}
+
+.chart-container h6 {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: var(--heading-color);
+}
+
+/* Спиннер для кнопки (если используешь Bootstrap классы, они уже есть) */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: .2em;
+    vertical-align: -0.125em; /* Выравнивание */
+}
+
+.spinner-border {
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    vertical-align: text-bottom;
+    border: .25em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    -webkit-animation: spinner-border .75s linear infinite;
+    animation: spinner-border .75s linear infinite;
+}
+
+@-webkit-keyframes spinner-border {
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spinner-border {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.cs2-stats-page .page-header h1.display-5 {
+    margin-bottom: 0.1rem;
+}
+
+.cs2-stats-page .page-header .lead {
+    margin-bottom: 1.5rem;
+}
+
+.cs2-stats-page .card {
+    margin-bottom: 1rem; /* Уменьшил общий отступ карточек */
+}
+
+.cs2-stats-page .card-header h5.section-title-like {
+    font-size: 1.1rem; /* Немного уменьшил заголовки в карточках */
+    padding-bottom: 0.25rem;
+    /* border-bottom: 2px solid var(--accent-yellow); уже есть в .section-title-like */
+}
+
+.cs2-stats-page .card-body {
+    padding: 0; /* Уменьшил паддинг тела карточки */
+}
+
+.card-body {
+    margin-top: 1rem;
+}
+
+.cs2-stats-page .card-body .table-responsive {
+    margin-top: 0.5rem;
+}
+
+.cs2-stats-page .card-body .table {
+    margin-bottom: 0;
+}
+
+.chart-title-custom { /* Для заголовков над графиками */
+    text-align: center;
+    margin-bottom: 0.5rem; /* Уменьшил отступ */
+    font-weight: 600;
+    font-size: 0.95rem; /* Уменьшил шрифт */
+    color: var(--text-color-secondary);
+}
+
+.cs2-inventory-table tbody tr:hover {
+    background-color: var(--table-row-hover-bg, rgba(0, 0, 0, 0.05)); /* Уменьшил прозрачность для лучшей видимости */
+}
+
+[data-theme="dark"] .cs2-inventory-table tbody tr:hover {
+    background-color: var(--table-row-hover-bg-dark, rgba(255, 255, 255, 0.05));
+}
+
+:root {
+    --table-row-hover-bg: rgba(0, 0, 0, 0.05);
+    --table-row-hover-bg-dark: rgba(255, 255, 255, 0.05);
+}
+
+.steam-logo-profile {
+    filter: invert(100%);
+}
+
+[data-theme="dark"] .page-header-icon {
+    filter: invert(100%);
+}

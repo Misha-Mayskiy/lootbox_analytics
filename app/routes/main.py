@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, url_for, redirect, flash, current_app
+from flask import Blueprint, render_template, url_for, redirect, flash, current_app, jsonify, request
 from flask_login import login_required, current_user
 from sqlalchemy import func
 
@@ -263,3 +263,38 @@ def regenerate_api_key():
     db.session.commit()
     flash('Ваш API-ключ был успешно перегенерирован.', 'success')
     return redirect(url_for('auth.user_profile'))
+
+
+@bp.route('/api/v1/user/update-cs2-investment', methods=['POST'])  # Или /user/settings/cs2-investment
+@login_required
+def update_cs2_investment():
+    data = request.get_json()
+    if data is None or 'amount' not in data:
+        return jsonify(message="Отсутствует параметр 'amount'"), 400
+
+    try:
+        amount = float(data['amount'])
+        if amount < 0:
+            return jsonify(message="Сумма не может быть отрицательной"), 400
+    except ValueError:
+        return jsonify(message="Некорректный формат суммы"), 400
+
+    current_user.cs2_investment_amount = amount
+    try:
+        db.session.commit()
+        new_roi = 0.0
+        cs2_game = Game.query.filter_by(slug='cs2').first()
+        if cs2_game:
+            inventory_value = db.session.query(func.sum(UserCS2InventoryItem.current_market_price)) \
+                                  .filter(UserCS2InventoryItem.user_id == current_user.id,
+                                          UserCS2InventoryItem.game_id == cs2_game.id,
+                                          UserCS2InventoryItem.current_market_price.isnot(None)) \
+                                  .scalar() or 0.0
+            if amount > 0:
+                new_roi = round(((inventory_value - amount) / amount) * 100, 2)
+
+        return jsonify(message="Сумма затрат успешно сохранена!", new_roi=new_roi), 200
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Ошибка сохранения CS2 investment для user {current_user.id}: {e}")
+        return jsonify(message=f"Ошибка сохранения затрат: {str(e)}"), 500

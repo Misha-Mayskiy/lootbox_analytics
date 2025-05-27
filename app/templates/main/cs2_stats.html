@@ -1,164 +1,168 @@
 {% extends "layout.html" %}
 
 {% block head_extra %}
-{# Можно добавить специфичный CSS для этой страницы, если потребуется #}
-{#
-<link rel="stylesheet" href="{{ url_for('static', filename='css/cs2_stats.css') }}"> #}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cs2_stats_page.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <input type="hidden" id="csrf_token_cs2_page" value="{{ csrf_token() }}">
-    <h2>Статистика CS2 для {{ current_user.username }}</h2>
-
-    <button id="syncCs2InventoryBtn" class="btn btn-success mb-3">Синхронизировать инвентарь Steam</button>
-    <div id="syncStatus" class="alert" style="display: none;"></div>
-
-    <div class="row mt-3">
-        <div class="col-md-6">
-            <h4>Обзор инвентаря (текущий)</h4>
-            <p>Общая стоимость: <strong>{{ total_inventory_value }} {{ currency }}</strong></p>
-            <p>Ваши затраты (введите вручную):
-                <input type="number" id="cs2InvestmentInput" value="{{ user_cs2_investment }}" step="0.01"
-                       class="form-control-sm" style="width: 100px;">
-                <button id="saveInvestmentBtn" class="btn btn-sm btn-outline-primary ml-1">Сохранить</button>
-            </p>
-            <p>ROI (на основе текущего инвентаря и затрат): <strong>{{ roi }}%</strong></p>
-        </div>
-        <div class="col-md-3">
-            <h4>Редкость предметов</h4>
-            {% if rarity_chart_data.labels %}
-            <canvas id="cs2RarityPieChart" style="max-height: 200px;"></canvas>
-            {% else %}
-            <p class="text-muted">Нет данных для графика редкости.</p>
-            {% endif %}
-        </div>
-        <div class="col-md-3">
-            <h4>Типы предметов</h4>
-            {% if type_chart_data.labels %}
-            <canvas id="cs2TypePieChart" style="max-height: 200px;"></canvas>
-            {% else %}
-            <p class="text-muted">Нет данных для графика типов.</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <h4 class="mt-4">Предметы в инвентаре ({{ inventory_items|length }})</h4>
-    {% if inventory_items %}
-    <div class="table-responsive">
-        <table class="table table-striped table-sm">
-            <thead>
-            <tr>
-                <th>Иконка</th>
-                <th>Название</th>
-                <th>Редкость</th>
-                <th>Тип</th>
-                <th>Износ</th>
-                <th>Цена ({{ currency }})</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for item in inventory_items %}
-            <tr>
-                <td><img src="{{ item.icon_url }}" alt="{{ item.name }}"
-                         style="width: 64px; height: auto; background-color: #555;" onerror="this.style.display='none'">
-                </td>
-                <td>{{ item.name }}</td>
-                <td>{{ item.rarity_str }}</td>
-                <td>{{ item.item_type_str }}</td>
-                <td>{{ item.exterior_str }}</td>
-                <td>{{ "%.2f"|format(item.current_market_price) if item.current_market_price is not none else 'N/A' }}
-                </td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <p>Ваш CS2 инвентарь пуст или еще не синхронизирован.</p>
+<div class="container mt-4 cs2-stats-page">
+    {% if csrf_token %}
+    <input type="hidden" id="csrf_token_value" value="{{ csrf_token() }}">
     {% endif %}
+
+    <div class="page-header mb-4 d-flex align-items-center">
+        <img src="{{ url_for('static', filename='img/game_icons/counter-strike.svg') }}" alt="CS2"
+             class="page-header-icon">
+        <div class="ml-3">
+            <h1 class="display-5 mb-0">Статистика Counter-Strike 2</h1>
+            <p class="lead text-muted mb-0">Анализ вашего текущего инвентаря Steam.</p>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show mb-3" role="alert">
+        {{ message }}
+        <button type="button" class="close-alert" data-dismiss="alert" aria-label="Close"><span
+                aria-hidden="true">×</span></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header"><h5 class="my-0 fw-normal section-title-like">Обзор и Управление</h5></div>
+                <div class="card-body">
+                    <button id="syncCs2InventoryBtn" class="btn btn-steam btn-profile-connect">
+                        <img src="{{ url_for('static', filename='img/game_icons/steam-logo.svg') }}" alt="Steam"
+                             class="steam-logo-profile">
+                        Синхронизировать инвентарь Steam
+                    </button>
+                    <div id="syncStatus" class="alert mt-2"
+                         style="display: none; padding: 0.5rem 1rem; font-size: 0.9rem;"></div>
+                    <hr class="my-3">
+                    <p class="mb-1"><strong>Общая стоимость инвентаря:</strong> <span
+                            class="font-weight-bold text-primary">{{ "%.2f"|format(total_inventory_value) }} {{ currency }}</span>
+                    </p>
+                    <form id="investmentForm" class="mt-2 mb-2">
+                        <div class="form-row align-items-end">
+                            <div class="col-auto">
+                                <label for="cs2InvestmentInput" class="small text-muted mb-1 d-block">Мои общие затраты
+                                    на CS2 ({{currency}}):</label>
+                                <input type="number" id="cs2InvestmentInput" name="cs2_investment"
+                                       value="{{ user_cs2_investment|default(0.0, true) }}" step="0.01"
+                                       class="form-control form-control-sm" placeholder="0.00">
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" id="saveInvestmentBtn" class="btn btn-primary btn-sm">Сохранить
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="investmentStatus" class="small mt-1" style="min-height: 1.2em;"></div>
+                    <p class="mb-0"><strong>ROI (Окупаемость Инвестиций):</strong>
+                        <span id="cs2RoiValue"
+                              class="font-weight-bold {% if roi > 0 %}text-success{% elif roi < 0 %}text-danger{% else %}text-muted{% endif %}">{{ roi }}%</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header"><h5 class="my-0 fw-normal section-title-like">Предметы в инвентаре ({{
+                    inventory_items|length }})</h5></div>
+                <div class="card-body">
+                    {% if inventory_items %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-sm cs2-inventory-table">
+                            <thead>
+                            <tr>
+                                <th style="width: 70px;"></th>
+                                <th>Название</th>
+                                <th>Редкость</th>
+                                <th>Тип</th>
+                                <th>Износ</th>
+                                <th class="text-right">Цена ({{ currency }})</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for item in inventory_items %}
+                            <tr class="rarity-csgo-{{ item.rarity_internal_name | lower | replace('rarity_', '') | replace('_weapon', '') | default('common') if item.rarity_internal_name else 'common' }}">
+                                <td>
+                                    <img src="{{ item.icon_url if item.icon_url else url_for('static', filename='img/placeholder_item.png') }}"
+                                         alt="{{ item.name }}" class="item-icon"
+                                         onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/placeholder_item.png') }}'; this.style.opacity='0.5';">
+                                </td>
+                                <td>
+                                    <a href="https://steamcommunity.com/market/listings/730/{{ item.market_hash_name | urlencode }}"
+                                       target="_blank" rel="noopener noreferrer" class="item-name-link"
+                                       title="Посмотреть на Торговой площадке Steam">
+                                        {{ item.name }}
+                                    </a>
+                                </td>
+                                <td>
+                                        <span class="rarity-text-display"
+                                              style="color: {{ item.rarity_color_hex | default('#333333') }}; font-weight: 600;">
+                                            {{ item.rarity_str }}
+                                        </span>
+                                </td>
+                                <td>{{ item.item_type_str }}</td>
+                                <td>{{ item.exterior_str }}</td>
+                                <td class="text-right font-weight-bold">
+                                    {{ "%.2f"|format(item.current_market_price) if item.current_market_price is not none
+                                    else 'N/A' }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">Ваш CS2 инвентарь пуст или еще не синхронизирован. Нажмите кнопку
+                        "Синхронизировать инвентарь Steam", чтобы загрузить данные.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header"><h5 class="my-0 fw-normal section-title-like">Визуализация Инвентаря</h5></div>
+                <div class="card-body">
+                    <div class="chart-container mb-3">
+                        <h6 class="text-center">Редкость предметов</h6>
+                        {% if rarity_chart_data.labels and rarity_chart_data.labels|length > 0 %}
+                        <canvas id="cs2RarityPieChart" style="max-height: 250px;"></canvas>
+                        {% else %}
+                        <p class="text-muted small text-center">Нет данных для графика редкости.</p>
+                        {% endif %}
+                    </div>
+                    <div class="chart-container">
+                        <h6 class="text-center">Типы предметов</h6>
+                        {% if type_chart_data.labels and type_chart_data.labels|length > 0 %}
+                        <canvas id="cs2TypePieChart" style="max-height: 250px;"></canvas>
+                        {% else %}
+                        <p class="text-muted small text-center">Нет данных для графика типов.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+{% endblock %}
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const syncBtn = document.getElementById('syncCs2InventoryBtn');
-        const syncStatusDiv = document.getElementById('syncStatus');
-        const investmentInput = document.getElementById('cs2InvestmentInput');
-        const saveInvestmentBtn = document.getElementById('saveInvestmentBtn');
-        const csrfToken = document.getElementById('csrf_token_cs2_page').value;
-
-        if (syncBtn) {
-            syncBtn.addEventListener('click', function () {
-                syncStatusDiv.style.display = 'block';
-                syncStatusDiv.className = 'alert alert-info';
-                syncStatusDiv.innerText = 'Синхронизация инвентаря CS2... Пожалуйста, подождите.';
-                syncBtn.disabled = true;
-
-                fetch("{{ url_for('cs2_api.sync_cs2_inventory') }}", { // Используем имя блюпринта cs2_api
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    }
-                })
-                    .then(response => response.json().then(data => ({status: response.status, body: data})))
-                    .then(dataObj => {
-                        syncStatusDiv.className = dataObj.status === 200 ? 'alert alert-success' : 'alert alert-danger';
-                        syncStatusDiv.innerText = dataObj.body.message || 'Статус неизвестен';
-                        if (dataObj.status === 200) {
-                            // Можно добавить таймер и перезагрузить страницу для обновления данных
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 2000);
-                        }
-                    })
-                    .catch(error => {
-                        syncStatusDiv.className = 'alert alert-danger';
-                        syncStatusDiv.innerText = 'Ошибка синхронизации: ' + error.message;
-                        console.error('Ошибка синхронизации CS2:', error);
-                    })
-                    .finally(() => {
-                        syncBtn.disabled = false;
-                    });
-            });
-        }
-
-        if (saveInvestmentBtn && investmentInput) {
-            saveInvestmentBtn.addEventListener('click', function () {
-                const amount = parseFloat(investmentInput.value);
-                // TODO: Отправить AJAX запрос на бэкенд для сохранения этой суммы
-                // Например, POST /api/v1/user/update-cs2-investment {'amount': amount}
-                // И обновить страницу или ROI на лету
-                alert('Функция сохранения затрат в разработке. Сумма: ' + amount);
-            });
-        }
-
-        // График редкости CS2
-        const cs2RarityCtx = document.getElementById('cs2RarityPieChart');
-        const cs2RarityData = JSON.parse('{{ rarity_chart_data | tojson | safe }}');
-        if (cs2RarityCtx && cs2RarityData.labels && cs2RarityData.labels.length > 0) {
-            new Chart(cs2RarityCtx, {
-                type: 'doughnut',
-                data: cs2RarityData,
-                options: {responsive: true, maintainAspectRatio: false, plugins: {legend: {position: 'right'}}}
-            });
-        } else if (cs2RarityCtx) {
-            cs2RarityCtx.style.display = 'none';
-        }
-
-        // График типов CS2
-        const cs2TypeCtx = document.getElementById('cs2TypePieChart');
-        const cs2TypeData = JSON.parse('{{ type_chart_data | tojson | safe }}');
-        if (cs2TypeCtx && cs2TypeData.labels && cs2TypeData.labels.length > 0) {
-            new Chart(cs2TypeCtx, {
-                type: 'pie',
-                data: cs2TypeData,
-                options: {responsive: true, maintainAspectRatio: false, plugins: {legend: {position: 'right'}}}
-            });
-        } else if (cs2TypeCtx) {
-            cs2TypeCtx.style.display = 'none';
-        }
-    });
+{% block scripts_extra %}
+<script id="cs2PageData">
+    window.cs2SyncUrl = "{{ url_for('cs2_api.sync_cs2_inventory') }}";
+    window.cs2UpdateInvestmentUrl = "{{ url_for('main.update_cs2_investment') }}";
+    window.chartDataCS2 = {
+        rarityChartData: {{ rarity_chart_data | default({}) | tojson | safe }},
+    typeChartData: {{ type_chart_data | default({}) | tojson | safe }}
+    };
 </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/cs2_stats_page.js') }}"></script>
 {% endblock %}

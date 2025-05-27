@@ -243,5 +243,5 @@ def sync_cs2_inventory():
         return jsonify(message=f"Ошибка сохранения данных инвентаря в БД: {str(e)}"), 500
 
     return jsonify(
-        message=f"Инвентарь CS2 успешно синхронизирован. Обработано предметов: {items_processed}, Добавлено/обновлено в БД: {items_added_to_db}."
+        message=f"Инвентарь CS2 успешно синхронизирован. Обработано предметов: {items_processed}."
     ), 200
