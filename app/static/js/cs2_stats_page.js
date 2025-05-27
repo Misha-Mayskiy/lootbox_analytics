@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
         syncBtn.addEventListener('click', function () {
             showSyncStatus('Синхронизация инвентаря CS2... Пожалуйста, подождите.', 'info');
             syncBtn.disabled = true;
-            syncBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Загрузка...';
+            syncBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>&nbsp;&nbsp;Загрузка...';
 
             const headers = {'Content-Type': 'application/json'};
             if (csrfToken) {
