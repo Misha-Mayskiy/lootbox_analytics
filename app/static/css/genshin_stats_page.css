@@ -1,0 +1,353 @@
+.genshin-stats-page .page-header-icon {
+    width: 48px;
+    height: 48px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.genshin-stats-page .section-title-like {
+    font-weight: 600;
+    padding-bottom: 0.3rem;
+    border-bottom: 2px solid var(--accent-yellow);
+    display: inline-block;
+    margin-bottom: 0 !important;
+    font-size: 1.2rem; /* Размер заголовков карточек */
+}
+
+.banner-group-card .card-body h6 { /* Заголовки внутри Pity-блоков */
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color-secondary);
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.banner-group-card .card-body .pity-tracker {
+    margin-bottom: 0.75rem;
+}
+
+.banner-group-card .card-body .pity-label {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.banner-group-card .card-body .pity-values {
+    font-size: 0.9rem;
+}
+
+.banner-group-card .card-body .progress {
+    margin-bottom: 0.5rem;
+    height: 8px !important;
+}
+
+
+/* Цвета для редкостей в текстовой сводке */
+:root {
+    --rarity-gold: #c3af41;
+    --rarity-purple: purple;
+    --rarity-blue: dodgerblue;
+}
+
+[data-theme="dark"] {
+    --rarity-gold: #ffd700;
+    --rarity-purple: #bb86fc;
+    --rarity-blue: #64b5f6;
+}
+
+/* Стили для бейджей удачливости и 50/50 */
+.rarity-badge-early {
+    background-color: var(--accent-green, #28a745) !important;
+    color: white;
+}
+
+.rarity-badge-soft {
+    background-color: var(--accent-blue, #007bff) !important;
+    color: white;
+}
+
+.rarity-badge-hard {
+    background-color: var(--accent-orange, #fd7e14) !important;
+    color: white;
+}
+
+.rarity-badge-guarantee {
+    background-color: var(--accent-green, #28a745) !important;
+    color: white;
+}
+
+.rarity-badge-win5050 {
+    background-color: var(--accent-blue, #17a2b8) !important;
+    color: white;
+}
+
+.rarity-badge-lose5050 {
+    background-color: var(--accent-red, #dc3545) !important;
+    color: white;
+}
+
+[data-theme="dark"] .rarity-badge-early {
+    --accent-green: #34d399;
+}
+
+[data-theme="dark"] .rarity-badge-soft {
+    --accent-blue: #539bf5;
+}
+
+[data-theme="dark"] .rarity-badge-hard {
+    --accent-orange: #ffa726;
+}
+
+/* ... и для 50/50, если нужно ... */
+
+.history-details summary {
+    font-weight: 600;
+    color: var(--link-color);
+    cursor: pointer;
+    padding: 0.5rem 0;
+    list-style: none; /* Убираем стандартный маркер */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.history-details summary::after {
+    content: '▼';
+    font-size: 0.8em;
+    transition: transform 0.2s;
+}
+
+.history-details[open] summary::after {
+    transform: rotate(180deg);
+}
+
+.history-details .list-group-item {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.chart-wrapper {
+    position: relative;
+}
+
+/* style.css или genshin_stats_page.css */
+.list-group-item.rarity-5 { /* Для списка последних дропов */
+    border-left-color: var(--rarity-gold) !important;
+    background-color: var(--rarity-5-bg, rgba(255, 215, 0, 0.1));
+}
+
+.list-group-item.rarity-4 {
+    border-left-color: var(--rarity-purple) !important;
+    background-color: var(--rarity-4-bg, rgba(172, 107, 248, 0.1));
+}
+
+.list-group-item.rarity-3 {
+    border-left-color: var(--rarity-blue) !important;
+    background-color: var(--rarity-3-bg, rgba(54, 162, 235, 0.05));
+}
+
+/* Переменные для темной темы */
+[data-theme="dark"] {
+    --rarity-5-bg: rgba(255, 215, 0, 0.15);
+    --rarity-4-bg: rgba(172, 107, 248, 0.15);
+    --rarity-3-bg: rgba(54, 162, 235, 0.1);
+}
+
+.btn-outline-accent {
+    color: var(--accent-orange);
+    border-color: var(--accent-orange);
+    background-color: transparent;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out; /* Добавил all для плавности */
+}
+
+.btn-outline-accent:hover {
+    color: var(--button-primary-text); /* Текст кнопки станет цветом текста на основной кнопке */
+    background-color: var(--accent-orange);
+    border-color: var(--accent-orange);
+    text-decoration: none;
+    transform: translateY(-1px); /* Легкий подъем */
+    box-shadow: var(--shadow-sm);
+}
+
+/* Убедимся, что переменные для темной темы для этой кнопки работают */
+[data-theme="dark"] .btn-outline-accent {
+    color: var(--accent-orange); /* Может быть, этот цвет достаточно ярок */
+    border-color: var(--accent-orange);
+}
+
+[data-theme="dark"] .btn-outline-accent:hover {
+    color: #121212; /* Темный текст на оранжевом фоне */
+    background-color: var(--accent-orange);
+    border-color: var(--accent-orange);
+}
+
+.history-details {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-base, 6px);
+    margin-top: 1rem; /* Уже есть в HTML */
+    background-color: var(--card-bg-color); /* Фон как у карточки, если details снаружи */
+    /* Если details внутри другой карточки, то фон может быть var(--bg-color) */
+}
+
+.history-details summary {
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    color: var(--link-color); /* Или var(--heading-color) */
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid transparent; /* Рамка появится при [open] */
+}
+
+.history-details summary:hover {
+    background-color: var(--nav-link-active-bg); /* Легкий фон при наведении */
+}
+
+.history-details[open] summary {
+    border-bottom-color: var(--border-color); /* Рамка под summary, когда открыто */
+}
+
+.history-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.history-details summary::after {
+    content: '▼';
+    font-size: 0.8em;
+    transition: transform 0.2s;
+    color: var(--text-color-secondary);
+}
+
+.history-details[open] summary::after {
+    transform: rotate(180deg);
+}
+
+.history-details .list-group.small { /* Для <ul> внутри */
+    font-size: 0.9em; /* Уменьшаем шрифт для элементов истории */
+    border-top: none; /* Убираем лишнюю рамку сверху у списка */
+}
+
+.history-details .list-group-item {
+    background-color: transparent; /* Чтобы не перекрывать фон details */
+    border-left: none;
+    border-right: none;
+    padding: 0.6rem 1.25rem; /* Немного уменьшил паддинг */
+}
+
+/* Убираем рамку у первого и последнего, если list-group-flush */
+.history-details .list-group-flush .list-group-item:first-child {
+    border-top: none;
+}
+
+.history-details .list-group-flush .list-group-item:last-child {
+    border-bottom: none;
+}
+
+
+.history-details .list-group-item strong {
+    color: var(--heading-color); /* Имя предмета делаем цветом заголовка */
+}
+
+.history-details .list-group-item .badge { /* Стили для бейджей 50/50 */
+    font-size: 0.7em;
+    padding: 0.3em 0.5em;
+    vertical-align: middle;
+}
+
+.chart-wrapper {
+    position: relative;
+    padding: 0.5rem;
+}
+
+.chart-wrapper h6 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-color-secondary);
+}
+
+[data-theme="dark"] .page-header-icon {
+    filter: invert(100%);
+}
+
+/* Для 5* предметов в одну строку */
+.item-list-inline {
+    line-height: 1.8; /* Чтобы элементы с разным количеством текста (счетчик/без) выглядели нормально */
+}
+
+.item-count-badge-inline {
+    font-size: 0.85em;
+    color: var(--text-color-secondary);
+    /* background-color: transparent; /* Если не нужен фон */
+    /* padding: 0 0.2em; */
+    font-weight: normal;
+}
+
+[data-theme="dark"] .item-count-badge-inline {
+    color: var(--text-color-secondary, #a0aec0);
+}
+
+[data-theme="dark"] .item-count-grid .col-6 {
+    --border-color-light: #444;
+}
+
+/* Для 4* предметов в две колонки - еще компактнее */
+.item-count-grid.small { /* Уже есть .small, но добавим специфику */
+    font-size: 0.85em; /* Еще чуть меньше шрифт */
+    line-height: 1.4; /* Уменьшаем межстрочный интервал, если элементы в несколько строк */
+}
+
+.item-count-grid-item { /* Кастомный класс для элементов */
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
+    /* border-bottom: 1px dashed var(--border-color-light, #e9ecef); /* Оставляем, если нравится */
+    /* display: flex; /* Уже есть у тебя, если .col-6 так настроен */
+    /* justify-content: space-between; */
+    /* align-items: center; */
+}
+
+.item-count-grid-item .item-name {
+    /* white-space: nowrap; */ /* Если хочешь в одну строку, но тогда truncate обязателен */
+    /* overflow: hidden; */
+    /* text-overflow: ellipsis; */
+    display: inline-block; /* Для работы text-overflow */
+    max-width: calc(100% - 40px); /* Оставляем место для счетчика, подбери значение */
+}
+
+.item-count-grid-item .item-count-badge {
+    font-size: 0.9em; /* Счетчик чуть меньше */
+    padding: 0.2em 0.4em;
+}
+
+/* Цвета для редкостей в списках (если еще не определены глобально) */
+.rarity-5-text {
+    color: var(--rarity-gold);
+    font-weight: 600;
+}
+
+.rarity-4-text {
+    color: var(--rarity-purple);
+    font-weight: 500;
+}
+
+/* Переменные для цветов редкости (убедись, что они есть) */
+:root {
+    --rarity-gold: #d3ac00;
+    --rarity-purple: #b100b1;
+    /* ... */
+    --border-color-light: #e9ecef;
+}
+
+[data-theme="dark"] {
+    --rarity-gold: #ffd700;
+    --rarity-purple: #bb86fc;
+    /* ... */
+    --border-color-light: #3e444c;
+}

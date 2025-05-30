@@ -23,9 +23,11 @@ document.addEventListener('DOMContentLoaded', function () {
             if (event.target.checked) {
                 document.documentElement.setAttribute('data-theme', 'dark');
                 localStorage.setItem('theme', 'dark');
+                document.dispatchEvent(new CustomEvent('themeChanged', {detail: {theme: 'dark'}})); // Генерируем событие
             } else {
                 document.documentElement.setAttribute('data-theme', 'light');
                 localStorage.setItem('theme', 'light');
+                document.dispatchEvent(new CustomEvent('themeChanged', {detail: {theme: 'light'}})); // Генерируем событие
             }
         });
     }

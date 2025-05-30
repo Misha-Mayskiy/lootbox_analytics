@@ -114,7 +114,7 @@ def sync_cs2_inventory():
 
     # Формируем URL
     inventory_url = f"{STEAM_INVENTORY_URL_BASE}/{validated_steam_id}/730/2"
-    inventory_params = {'l': 'english', 'count': 5000}
+    inventory_params = {'l': 'english'}
 
     inventory_response_obj = None
 

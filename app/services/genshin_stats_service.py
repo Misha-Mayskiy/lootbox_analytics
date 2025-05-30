@@ -73,7 +73,9 @@ class GenshinPityTracker:
             'losses_50_50': 0,
             'win_rate_50_50': 0,
             'avg_pity_5_star': 0,
-            'pity_luck_5_star': {}
+            'pity_luck_5_star': {},
+            'five_star_item_counts': {},
+            'four_star_item_counts': {},
         }
 
         drops = self._filter_drops_for_banner_group('character_event')
@@ -88,6 +90,8 @@ class GenshinPityTracker:
             state['pity5_count'] += 1
 
             if drop.item_rarity_text == '5':
+                state['five_star_item_counts'][drop.item_name] = state['five_star_item_counts'].get(drop.item_name,
+                                                                                                    0) + 1
                 pity_at_hit = state['pity5_count']
                 pity_sum_5_star += pity_at_hit
 
@@ -120,6 +124,8 @@ class GenshinPityTracker:
                 state['pity4_count'] = 0
 
             elif drop.item_rarity_text == '4':
+                state['four_star_item_counts'][drop.item_name] = state['four_star_item_counts'].get(drop.item_name,
+                                                                                                    0) + 1
                 state['pity4_count'] = 0
 
         state['lose50_active'] = _internal_lose50_flag_for_next_guarantee
