@@ -1,0 +1,143 @@
+.genshin-import-page .page-header-icon {
+    width: 48px;
+    height: 48px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.genshin-import-page .section-title-like {
+    font-weight: 600;
+    font-size: 1.2rem;
+    display: flex; /* Для выравнивания номера шага и текста */
+    align-items: center;
+    /* padding-bottom: 0.3rem; */ /* Убрал, т.к. это в card-header */
+    /* border-bottom: 2px solid var(--accent-yellow); */
+    /* display: inline-block; */
+}
+
+.genshin-import-page .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background-color: var(--accent-yellow);
+    color: var(--button-primary-text);
+    font-weight: bold;
+    font-size: 0.9rem;
+    border-radius: 50%;
+    margin-right: 0.75rem;
+}
+
+.import-steps {
+    padding-left: 1.5rem;
+    margin-top: 1rem;
+}
+
+.import-steps li {
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.import-steps strong {
+    color: var(--heading-color);
+}
+
+.command-block {
+    background-color: var(--input-bg-color);
+    border: 1px solid var(--input-border-color);
+    padding: 0.75rem 1rem; /* Уменьшил паддинг */
+    border-radius: var(--border-radius-base, 6px);
+    margin-top: 0.5rem;
+    margin-bottom: 1rem; /* Отступ снизу */
+    display: flex;
+    align-items: flex-start; /* Чтобы кнопка не растягивалась по высоте pre */
+}
+
+.command-block pre {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.875em;
+    flex-grow: 1;
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+[data-theme="dark"] .command-block pre code {
+    color: var(--text-color-secondary, #bdc1c6);
+}
+
+.copy-command-btn {
+    margin-left: 1rem;
+    white-space: nowrap;
+    align-self: center;
+}
+
+#importUrlForm .form-label {
+    font-weight: 600;
+}
+
+#importUrlForm textarea.form-control {
+    min-height: 120px;
+    font-size: 0.95rem;
+}
+
+#importResultCard .card-body ul {
+    padding-left: 1.2rem;
+}
+
+#importResultCard .card-body ul li {
+    margin-bottom: 0.25rem;
+}
+
+#resultActions .btn {
+    margin-top: 1rem;
+}
+
+/* app/static/css/genshin_import_page.css */
+#importResultCard {
+    /* Стили уже должны наследоваться от .card */
+    /* Можно добавить специфичные отступы, если нужно */
+    border-left: 3px solid var(--info-color, #17a2b8); /* Полоска слева для выделения */
+}
+[data-theme="dark"] #importResultCard {
+    --info-color: #6edff6;
+}
+
+#importResultCard .card-header .section-title-like {
+    font-size: 1.1rem; /* Немного меньше заголовок */
+}
+
+#importResultIcon svg {
+    width: 36px; /* Размер иконок успеха/ошибки */
+    height: 36px;
+    margin-bottom: 0.5rem;
+}
+
+#importResultCard #resultMessage {
+    font-size: 1.1em;
+    margin-bottom: 1rem;
+}
+
+#importResultCard #importDetails p {
+    margin-bottom: 0.5rem;
+}
+#importResultCard #importDetails ul {
+    margin-top: 0.3rem;
+    margin-bottom: 0.8rem;
+    padding-left: 1rem; /* Для списка ошибок */
+}
+#importResultCard #importDetails ul li {
+    word-break: break-word; /* Перенос длинных ошибок */
+}
+
+#resultActions .btn { /* Кнопка "Перейти к статистике" */
+    width: 100%; /* Растянуть на всю ширину карточки */
+}
+
+[data-theme="dark"] .page-header-icon {
+    filter: invert(100%);
+}

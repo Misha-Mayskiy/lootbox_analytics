@@ -100,7 +100,10 @@ def dashboard():
 @bp.route('/dashboard/genshin/import-url')
 @login_required
 def genshin_import_url_page():
-    return render_template('main/import_genshin_url.html', title="Импорт Genshin Impact")
+    ps_command = "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex \"&{$((New-Object System.Net.WebClient).DownloadString('https://gist.githubusercontent.com/Misha-Mayskiy/c4318cf9aaa4f6c93da914affe4312d5/raw/c0271b41860e4c17659e033834e2d7a4b7abed33/GetGenshinWishURL.ps1'))} global\""
+    gist_url_for_script = "https://gist.github.com/Misha-Mayskiy/c4318cf9aaa4f6c93da914affe4312d5/raw/c0271b41860e4c17659e033834e2d7a4b7abed33/GetGenshinWishURL.ps1"
+    return render_template('main/import_genshin_url.html', title="Импорт Genshin Impact",
+                           powershell_command_text=ps_command, gist_url=gist_url_for_script)
 
 
 @bp.route('/dashboard/genshin-stats')

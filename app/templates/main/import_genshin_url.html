@@ -1,139 +1,132 @@
 {% extends "layout.html" %}
 
+{% block head_extra %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/genshin_import_page.css') }}">
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2>Импорт истории молитв Genshin Impact</h2>
-    <p>Этот инструмент поможет вам импортировать историю ваших молитв из Genshin Impact.</p>
+<div class="container mt-4 genshin-import-page">
+    <div class="row justify-content-center"> <!-Этот row центрирует всю нашу колонку контента->
+        <div class="col-lg-9 col-md-10"> <!-Основная контентная колонка->
 
-    <h4>Шаг 1: Получите ссылку на историю молитв</h4>
-    <ol>
-        <li>Запустите Genshin Impact на вашем ПК.</li>
-        <li>Откройте в игре историю молитв (меню "Молитва" -> кнопка "История").</li>
-        <li>Подождите, пока история полностью загрузится.</li>
-        <li>
-            Скопируйте и выполните следующую команду в <strong>Windows PowerShell</strong>:
-            <pre><code id="psCommand"
-                       style="cursor: pointer; padding: 5px; background-color: #f0f0f0; border: 1px solid #ccc; display: inline-block;">Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex "&{$((New-Object System.Net.WebClient).DownloadString('https://gist.githubusercontent.com/Misha-Mayskiy/c4318cf9aaa4f6c93da914affe4312d5/raw/c0271b41860e4c17659e033834e2d7a4b7abed33/GetGenshinWishURL.ps1'))} global"</code></pre>
-            <button class="btn btn-sm btn-outline-secondary ml-2" onclick="copyCommand()">Копировать команду</button>
-            <p><small>Этот скрипт безопасно извлечет временную ссылку на вашу историю молитв и скопирует ее в буфер
-                обмена. Вы можете <a
-                        href="https://gist.githubusercontent.com/Misha-Mayskiy/c4318cf9aaa4f6c93da914affe4312d5/raw/c0271b41860e4c17659e033834e2d7a4b7abed33/GetGenshinWishURL.ps1"
-                        target="_blank">просмотреть
-                    исходный код скрипта здесь</a>.</small></p>
-        </li>
-        <li>После выполнения команды в PowerShell, ссылка будет скопирована в ваш буфер обмена.</li>
-    </ol>
+            <div class="page-header mb-4 d-flex align-items-center"> <!-Заголовок теперь внутри колонки->
+                <img src="{{ url_for('static', filename='img/game_icons/genshin-impact.svg') }}" alt="Genshin Impact"
+                     class="page-header-icon">
+                <div class="ml-3">
+                    <h1 class="display-5 mb-0">Импорт Истории Молитв</h1>
+                    <p class="lead text-muted mb-0">Genshin Impact</p>
+                </div>
+            </div>
 
-    <h4>Шаг 2: Вставьте ссылку и импортируйте</h4>
-    <form id="importUrlForm">
-        <div class="form-group">
-            <label for="wishHistoryUrl">Вставьте ссылку сюда:</label>
-            <textarea class="form-control" id="wishHistoryUrl" name="wish_history_url" rows="3" required></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Импортировать данные</button>
-    </form>
+            {% with messages = get_flashed_messages(with_categories=true) %} <!-Flash тоже внутри->
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show mb-3" role="alert">
+                {{ message }}
+                <button type="button" class="close-alert" data-dismiss="alert" aria-label="Close"><span
+                        aria-hidden="true">×</span></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
 
-    <div id="importResult" class="mt-3" style="display:none;">
-        <h4>Результат импорта:</h4>
-        <p id="resultMessage"></p>
-        <p>Вставлено записей: <span id="resultInserted"></span></p>
-        <p>Пропущено записей (дубликаты/ошибки): <span id="resultSkipped"></span></p>
-        <div id="resultFetchErrorsContainer" style="display:none;">
-            <strong>Ошибки при получении данных от Hoyoverse:</strong>
-            <ul id="resultFetchErrorsList"></ul>
-        </div>
-        <div id="resultProcessingErrorsContainer" style="display:none;">
-            <strong>Ошибки при обработке/сохранении данных:</strong>
-            <ul id="resultProcessingErrorsList"></ul>
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header"><h5 class="my-0 fw-normal section-title-like">
+                    <span class="step-number">1</span> Получите ссылку на историю молитв
+                </h5></div>
+                <div class="card-body">
+                    <ol class="import-steps">
+                        <li>Запустите Genshin Impact на вашем ПК.</li>
+                        <li>Откройте в игре историю молитв (меню "Молитва" -> кнопка "История").</li>
+                        <li>Подождите, пока история полностью загрузится (пролистайте несколько страниц, если история
+                            длинная).
+                        </li>
+                        <li>
+                            Скопируйте и выполните следующую команду в <strong>Windows PowerShell</strong>:
+                            <div class="command-block mt-2 mb-2">
+                                <pre><code id="psCommand">{{ powershell_command_text }}</code></pre>
+                                <button class="btn btn-sm btn-outline-secondary copy-command-btn"
+                                        onclick="copyCommand()">
+                                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-clipboard-fill"
+                                         fill="currentColor" xmlns="http://www.w3.org/2000/svg"
+                                         style="margin-right: 4px; vertical-align: text-bottom;">
+                                        <path fill-rule="evenodd"
+                                              d="M10 1.5a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-1Zm-5 0A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5v1A1.5 1.5 0 0 1 9.5 4h-3A1.5 1.5 0 0 1 5 2.5v-1Zm-2 0h1v1A2.5 2.5 0 0 0 6.5 5h3A2.5 2.5 0 0 0 12 2.5v-1h1a2 2 0 0 1 2 2V14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V3.5a2 2 0 0 1 2-2z"/>
+                                    </svg>
+                                    Копировать
+                                </button>
+                            </div>
+                            <p class="small text-muted">
+                                <i class="fas fa-info-circle"></i> Этот скрипт безопасно извлечет временную ссылку на
+                                вашу историю молитв и скопирует ее в буфер обмена.
+                                Исходный код скрипта: <a href="{{ gist_url }}" target="_blank"
+                                                         rel="noopener noreferrer">GitHub Gist</a>.
+                            </p>
+                        </li>
+                        <li>После выполнения команды в PowerShell, ссылка будет автоматически скопирована в ваш буфер
+                            обмена.
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Шаг 2: Вставка ссылки и импорт -->
+            <div class="card mb-4 shadow-sm"> {# Добавил mb-4 для отступа перед блоком результатов #}
+                <div class="card-header"><h5 class="my-0 fw-normal section-title-like">
+                    <span class="step-number">2</span> Вставьте ссылку и импортируйте
+                </h5></div>
+                <div class="card-body">
+                    <form id="importUrlForm" class="auth-form">
+                        {% if csrf_token %}
+                        <input type="hidden" id="csrf_token_value_import" value="{{ csrf_token() }}">
+                        {% endif %}
+                        <div class="form-group">
+                            <label for="wishHistoryUrl" class="form-label">Ссылка из буфера обмена:</label>
+                            <textarea class="form-control" id="wishHistoryUrl" name="wish_history_url" rows="5" required
+                                      placeholder="Вставьте сюда ссылку, скопированную из PowerShell (https://webstatic-sea.hoyoverse.com/...)"></textarea>
+                        </div>
+                        <button type="submit" id="submitImportBtn" class="btn btn-primary btn-lg btn-block">
+                            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-cloud-arrow-up-fill btn-icon"
+                                 fill="currentColor" xmlns="http://www.w3.org/2000/svg"
+                                 style="margin-right: 8px; vertical-align: text-bottom;">
+                                <path d="M8 0a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 4.095 0 5.555 0 7.318 0 9.366 1.708 11 3.781 11H7.5V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11h3.719C14.728 11 16 9.473 16 7.5c0-1.905-1.348-3.478-3.073-3.644-.244-.89-.848-1.691-1.592-2.308A5.53 5.53 0 0 0 8 0zm-.354 15.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 14.293V10.5a.5.5 0 0 0-1 0v3.793l-2.146-2.147a.5.5 0 0 0-.708.708l3 3z"/>
+                            </svg>
+                            Импортировать Данные
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Блок результатов импорта (теперь ниже) -->
+            <div id="importResultCard" class="card shadow-sm mb-4" style="display:none;"> {# Добавил mb-4 #}
+                <div class="card-header"><h5 class="my-0 fw-normal section-title-like">Результат Импорта</h5></div>
+                <div class="card-body">
+                    <div id="importResultIcon" class="text-center mb-2"></div>
+                    <p id="resultMessage" class="font-weight-bold text-center"></p>
+                    <div id="importDetails" style="font-size: 0.9em;">
+                        <p class="mb-1">Вставлено новых записей: <strong id="resultInserted"></strong></p>
+                        <p class="mb-1">Пропущено (дубликаты/ошибки обработки): <strong id="resultSkipped"></strong></p>
+                        <div id="resultFetchErrorsContainer" style="display:none;" class="mt-2">
+                            <strong class="text-danger">Ошибки при получении данных от Hoyoverse:</strong>
+                            <ul id="resultFetchErrorsList" class="list-unstyled small text-danger pl-3"></ul>
+                        </div>
+                        <div id="resultProcessingErrorsContainer" style="display:none;" class="mt-2">
+                            <strong class="text-danger">Ошибки при сохранении данных:</strong>
+                            <ul id="resultProcessingErrorsList" class="list-unstyled small text-danger pl-3"></ul>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-center" id="resultActions" style="display:none;">
+                        <a href="{{ url_for('main.genshin_stats_page') }}" class="btn btn-primary">Перейти к
+                            статистике</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<script>
-    function copyCommand() {
-        const commandText = document.getElementById('psCommand').innerText;
-        navigator.clipboard.writeText(commandText).then(function () {
-            alert('Команда скопирована в буфер обмена!');
-        }, function (err) {
-            alert('Не удалось скопировать команду. Пожалуйста, скопируйте вручную.');
-            console.error('Async: Could not copy text: ', err);
-        });
-    }
-
-    document.getElementById('importUrlForm').addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        const urlInput = document.getElementById('wishHistoryUrl');
-        const wishUrl = urlInput.value.trim();
-        const importResultDiv = document.getElementById('importResult');
-        const resultMessage = document.getElementById('resultMessage');
-        const resultInserted = document.getElementById('resultInserted');
-        const resultSkipped = document.getElementById('resultSkipped');
-
-        const fetchErrorsContainer = document.getElementById('resultFetchErrorsContainer');
-        const fetchErrorsList = document.getElementById('resultFetchErrorsList');
-        const processingErrorsContainer = document.getElementById('resultProcessingErrorsContainer');
-        const processingErrorsList = document.getElementById('resultProcessingErrorsList');
-
-        if (!wishUrl) {
-            alert('Пожалуйста, вставьте URL.');
-            return;
-        }
-
-        importResultDiv.style.display = 'block';
-        resultMessage.innerText = 'Идет обработка, пожалуйста, подождите... Это может занять некоторое время.';
-        resultInserted.innerText = '-';
-        resultSkipped.innerText = '-';
-        fetchErrorsContainer.style.display = 'none';
-        fetchErrorsList.innerHTML = '';
-        processingErrorsContainer.style.display = 'none';
-        processingErrorsList.innerHTML = '';
-
-
-        fetch("{{ url_for('import_data_api.import_genshin_from_url') }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({wish_history_url: wishUrl})
-        })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errData => {
-                        throw new Error(errData.message || `Ошибка сервера: ${response.status}`);
-                    }).catch(() => {
-                        throw new Error(`Ошибка сервера: ${response.status} ${response.statusText}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                resultMessage.innerText = data.message || 'Обработка завершена.';
-                resultInserted.innerText = data.inserted !== undefined ? data.inserted : '-';
-                resultSkipped.innerText = data.skipped !== undefined ? data.skipped : '-';
-
-                if (data.fetch_api_errors && data.fetch_api_errors.length > 0) {
-                    fetchErrorsContainer.style.display = 'block';
-                    data.fetch_api_errors.forEach(err => {
-                        const li = document.createElement('li');
-                        li.textContent = err;
-                        fetchErrorsList.appendChild(li);
-                    });
-                }
-                if (data.processing_db_errors && data.processing_db_errors.length > 0) {
-                    processingErrorsContainer.style.display = 'block';
-                    data.processing_db_errors.forEach(err => {
-                        const li = document.createElement('li');
-                        li.textContent = err;
-                        processingErrorsList.appendChild(li);
-                    });
-                }
-                urlInput.value = '';
-            })
-            .catch(error => {
-                resultMessage.innerText = `Произошла ошибка: ${error.message}`;
-                console.error('Ошибка:', error);
-            });
-    });
+<script id="genshinImportPageData">
+    window.genshinImportUrl = "{{ url_for('import_data_api.import_genshin_from_url') }}";
 </script>
+<script src="{{ url_for('static', filename='js/genshin_import_page.js') }}"></script>
 {% endblock %}
